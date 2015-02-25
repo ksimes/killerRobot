@@ -1,0 +1,56 @@
+( compile )
+: IMMEDIATE |makeImmediate ;
+
+: LOAD |load ; ( Expects a properly delimited string to follow with path to filename )
+
+( Other comment type )
+: \ |processComment2 ; IMMEDIATE
+
+( Branching )
+: IF |ifTest ; IMMEDIATE
+: THEN |thenJump ; IMMEDIATE
+: ELSE |elseJump ; IMMEDIATE
+
+( Looping )
+: DO |doStart ; IMMEDIATE
+: LOOP |loop ; IMMEDIATE
+: +LOOP |plusLoop ; IMMEDIATE
+: LEAVE ; IMMEDIATE
+: BEGIN |begin ; IMMEDIATE
+: AGAIN |again ; IMMEDIATE
+: QUIT |quit ; IMMEDIATE
+
+: >R |popA |pushRA ;
+: R> |popRA |pushA ;
+: I |popRA |pushRA |pushA ;
+: J ;
+
+( Arithmetic )
+: + |popA |popB |addAB |pushA ;
+: - |popB |popA |subAB |pushA ;
+: * |popA |popB |mulAB |pushA ;
+: / |popB |popA |divAB |pushA ;
+: MOD ;
+: /MOD ;
+: DUP |popA |pushA |pushA ;
+: DROP |popA ;
+: SWAP |popA |popB |pushA |pushB ;
+: OVER ;
+: ROT ;
+
+( Logic )
+: = |popA |popB |equalAB |pushA ;
+: < |popB |popA |lessAB |pushA ;
+: > |popB |popA |greaterAB |pushA ;
+: 0= |popA 0 |popB |equalAB |pushA ;
+: 0< |popA 0 |popB |lessAB |pushA ;
+: 0> |popA 0 |popB |greaterAB |pushA ;
+
+( display )
+: ." |processString ; IMMEDIATE
+: . |popA |printA ;
+: EMIT |popA |emitA ;
+: CR 10 EMIT ;
+: SPACE 32 EMIT ;
+: SPACES 0 DO 32 EMIT LOOP ;
+: WORDS |dumpDictionary ;

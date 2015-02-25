@@ -1,0 +1,50 @@
+
+ 1 2 + 200 + 4 / 4 * . CR
+
+ -10 21 + . CR
+
+ 10 4 - . CR
+
+ 10 dup + . cr
+
+ 2 2 = . CR
+
+ 1 2 < . CR
+
+space CR
+
+LOAD "src\test\resources\test2.robo"
+
+ 20 4 / . CR
+ 17 12 * 4 + . CR
+
+ 10 DUP . . CR
+
+    42
+    emit
+    cr
+
+: error ." This is an error message" ;
+
+: SQUARED ( n -- nsquared x )
+ DUP *  ;
+
+ : SUM-OF-SQUARES SQUARED SWAP SQUARED  +  ;
+
+ 3 squared .
+3 4 SUM-OF-SQUARES .
+
+." this is a test string" cr
+
+error
+
+ : STAR	 ( -- )            \ Print a single star
+   42 EMIT ;	           \ 42 is the ASCII code for *
+
+ star
+
+ 25 EGGSIZE cr
+
+  : TEST   10 0 DO  CR ." Hello "  LOOP ;
+
+  TEST

@@ -1,0 +1,55 @@
+(
+1 0= . cr
+
+ -2 0< . cr
+
+-2 0> . cr
+
+3 0> . cr
+
+0 0= . cr
+
+1 1 = . cr
+
+2 1 = . cr
+
+1 2 > . cr
+
+2 1 > . cr
+
+
+: TEST1 1 = if ." is one so " 10 13 + . ." Some stuff " then ." and we're finished" cr ." new line" cr ." test" cr ;
+
+2 TEST1
+)
+
+ : ?DAY  DUP 32 = IF  ." Is thirtytwo " ELSE 15 = IF ." is fifteen " ELSE ." no idea " THEN THEN ;
+
+32 ?Day cr
+15 ?Day cr
+10 ?Day cr
+cr cr
+
+( numerator denominator -- quotient
+    : /CHECK
+      DUP 0= IF  ." invalid " DROP
+           ELSE /
+           THEN ;
+
+4 2 /Check .
+)
+
+    : EGGSIZE    DUP  18 < IF  ." reject "      ELSE
+            DUP  21 < IF  ." small "       ELSE
+            DUP  24 < IF  ." medium "      ELSE
+            DUP  27 < IF  ." large "       ELSE
+            DUP  30 < IF  ." extra large " ELSE
+                      ." error "
+            THEN THEN THEN THEN THEN DROP ;
+
+23 EGGSIZE cr
+29 EGGSIZE cr
+40 EGGSIZE cr
+17 EGGSIZE cr
+20 EGGSIZE cr
+25 EGGSIZE cr
