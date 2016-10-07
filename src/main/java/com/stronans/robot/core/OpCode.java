@@ -28,6 +28,7 @@ public enum OpCode {
     incB,
     decB,
     jumpEqAB,
+    jumpANEq0,
     addAB,
     subAB,
     mulAB,

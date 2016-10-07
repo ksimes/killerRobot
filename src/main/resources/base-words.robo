@@ -6,6 +6,11 @@
 ( Other comment type )
 : \ |processComment2 ; IMMEDIATE
 
+: >R |popA |pushRA ;
+: R> |popRA |pushA ;
+: I |popRA |pushRA |pushA ;
+: J ;
+
 ( Branching )
 : IF |ifTest ; IMMEDIATE
 : THEN |thenJump ; IMMEDIATE
@@ -19,11 +24,6 @@
 : BEGIN |begin ; IMMEDIATE
 : AGAIN |again ; IMMEDIATE
 : QUIT |quit ; IMMEDIATE
-
-: >R |popA |pushRA ;
-: R> |popRA |pushA ;
-: I |popRA |pushRA |pushA ;
-: J ;
 
 ( Arithmetic )
 : + |popA |popB |addAB |pushA ;

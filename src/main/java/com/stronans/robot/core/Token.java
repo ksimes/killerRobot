@@ -1,5 +1,7 @@
 package com.stronans.robot.core;
 
+import com.google.common.base.Optional;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
@@ -7,11 +9,11 @@ import java.io.IOException;
  * Processing of the current buffered input stream into tokens and identifying the content of those tokens.
  * Created by S.King on 23/02/2015.
  */
-public class Token {
+public final class Token {
     private static final String OP_CODE_ID = "|";
 
-    private Dictionary dictionary;
-    private BufferedInputStream inputStream;
+    private final Dictionary dictionary;
+    private final BufferedInputStream inputStream;
     private String tokenContent;
 
     public Token(BufferedInputStream inputStream, Dictionary dictionary) {
@@ -19,14 +21,14 @@ public class Token {
         this.inputStream = inputStream;
     }
 
-    public void clear()
-    {
+    public void clear() {
         tokenContent = "";
     }
 
     /**
      * While we have whitespace then skip it then pickup all no-whitespace characters until a new whitespace
      * character appears, this then is a token.
+     *
      * @return - true if we have a valid token and false if we hit the end of the stream.
      * @throws java.io.IOException
      */
@@ -62,92 +64,60 @@ public class Token {
 
     /**
      * Checks that the token is not empty (zero length) and that if whitespace is removed that it is not empty (zero length).
+     *
      * @return true if a valid token otherwise false.
      */
-    private boolean isValidToken()
-    {
+    private boolean isValidToken() {
         return !tokenContent.isEmpty() && !tokenContent.trim().isEmpty();
     }
 
     /**
-     * Checks if this token is already part of the word dictionary.
-     * @return true if a word in the dictionary otherwise false.
-     */
-    public boolean isWord()
-    {
-        return dictionary.lookup(tokenContent) != null;
-    }
-
-    /**
      * Looks up this token in the word dictionary and returns it's reference.
-     * @return The Word if it is in the dictionary or null otherwise.
+     *
+     * @return Optional containing the word if it is in the dictionary otherwise returns absent.
      */
-    public Word lookupWord()
-    {
-        return dictionary.lookup(tokenContent);
-    }
+    public Optional<Word> asWord() {
+        Word word = dictionary.lookup(tokenContent);
 
-    /**
-     * Checks if this token is a number.
-     * @return true if a word is a long format number.
-     */
-    public boolean isNumber()
-    {
-        boolean result;
-
-        try {
-            Long num = Long.parseLong(tokenContent);
-            result = true;
-
-        } catch (NumberFormatException e) {
-            result = false;
-        }
-
-        return result;
+        if (word == null)
+            return Optional.absent();
+        else
+            return Optional.of(word);
     }
 
     /**
      * Converts this token to a number and returns its value.
+     *
      * @return The long number found.
      */
-    public long asNumber()
-    {
+    public Optional<Long> asNumber() {
         long result;
 
         try {
             result = Long.parseLong(tokenContent);
 
         } catch (NumberFormatException e) {
-            result = 0;
+            return Optional.absent();
         }
 
-        return result;
+        return Optional.of(result);
     }
 
     /**
      * Returns the token found as a text item
+     *
      * @return String of the text found
      */
-    public String asText()
-    {
+    public String asText() {
         return tokenContent;
-    }
-
-    public boolean isOpCode() {
-        boolean result = false;
-
-        if (tokenContent.startsWith(OP_CODE_ID)) {
-            result = OpCode.fromString(tokenContent.substring(1)) != null;
-        }
-
-        return result;
     }
 
     /**
      * Checks if this token is a number.
-     * @return true if a word is a long format number.
+     *
+     * @return Optional containing the word as a long format number or absent.
      */
-    public OpCode asOpCode() {
+    public Optional<OpCode> asOpCode() {
         OpCode opCode = null;
 
         if (tokenContent.startsWith(OP_CODE_ID)) {
@@ -156,6 +126,9 @@ public class Token {
             opCode = OpCode.fromString(code);
         }
 
-        return opCode;
+        if (opCode == null)
+            return Optional.absent();
+        else
+            return Optional.of(opCode);
     }
 }

@@ -26,13 +26,13 @@
 
 
  \ Sample test session:
-\ CR 5 SQUARE	\ user types this line, output follows
-\ CR 7 STARS	\ user types this line, output follows
-\ CR 8 TRIANGLE  \ user types this line, output follows
-\ CR 6 TOWER	\ user types this line, output follows
+ CR 5 SQUARE	\ user types this line, output follows
+ CR 7 STARS	\ user types this line, output follows
+ CR 8 TRIANGLE  \ user types this line, output follows
+ CR 6 TOWER	\ user types this line, output follows
  \ End of sample code and test session.
 
-: TEST CR 10 0 DO I DUP . 20 > IF QUIT THEN LOOP ;
+: TEST CR 10 0 DO I DUP . 20 > IF QUIT THEN 2 +LOOP ;
 
 TEST CR
 

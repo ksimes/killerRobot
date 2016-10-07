@@ -1,7 +1,5 @@
 package com.stronans.robot;
 
-import com.stronans.robot.core.Dictionary;
-import com.stronans.robot.core.StringLibrary;
 import com.stronans.robot.fileprocessing.ProcessFile;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -62,6 +60,8 @@ public class RobotStartup {
             int i = 0, j;
             String arg;
             char flag;
+
+            logger.info("Program startup");
 
             for (String argument : args) {
                 logger.trace("program arguments : [" + argument + "]");

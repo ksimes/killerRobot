@@ -101,7 +101,7 @@ public class Compiler {
 
     public void addNumber(Long number) {
 
-        MemoryEntry me = new MemoryEntry((long) number);
+        MemoryEntry me = new MemoryEntry(number);
         compiledCode.add(me);
 
         if (logger.isTraceEnabled()) {
