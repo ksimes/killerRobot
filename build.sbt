@@ -1,7 +1,7 @@
 import sbt.Keys._
 
 lazy val commonSettings = Seq(
-  organization := "com.example",
+  organization := "com.stronans",
   version := "0.2.0",
   scalaVersion := "2.10.3",
   exportJars := true,
