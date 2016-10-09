@@ -1,7 +1,6 @@
 package com.stronans.robot;
 
-import com.stronans.robot.core.Dictionary;
-import com.stronans.robot.core.StringLibrary;
+import com.stronans.motozero.motors.MotorController;
 import com.stronans.robot.fileprocessing.ProcessFile;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -52,6 +51,9 @@ public class RobotStartup {
             // Startup all of the threads which will handle:
             //   sight (Ultrasonic detectors)
             //   movement (wheels and later legs)
+            MotorController motorController = new MotorController();
+            Thread motorControl = new Thread(motorController);
+            motorControl.start();
             //   temperature and humidity checks
             //   wifi transmission and reception (updates of goals and reports to central data server)
             //   Camera
@@ -62,6 +64,8 @@ public class RobotStartup {
             int i = 0, j;
             String arg;
             char flag;
+
+            logger.info("Program startup");
 
             for (String argument : args) {
                 logger.trace("program arguments : [" + argument + "]");

@@ -1,22 +1,27 @@
+( regression tests )
 
- 1 2 + 200 + 4 / 4 * . CR
+: TEST IF ." Success" ELSE ." Failure" THEN CR ;
 
- -10 21 + . CR
+ 1 2 + 200 + 4 / 4 * DUP . 200 = TEST
 
- 10 4 - . CR
+ -10 21 + DUP . 11 = TEST
 
- 10 dup + . cr
+ 10 4 - DUP . 6 = TEST
 
- 2 2 = . CR
+ 10 dup + dup . 20 = TEST
 
- 1 2 < . CR
+ 2 2 = TEST
 
-space CR
+ 1 2 < TEST
+
+." Loading & processing file" CR
 
 LOAD "src\test\resources\test2.robo"
 
- 20 4 / . CR
- 17 12 * 4 + . CR
+." Finished processing file" CR
+
+ 20 4 / 5 = TEST
+ 17 12 * 4 + 208 = TEST
 
  10 DUP . . CR
 
@@ -24,7 +29,7 @@ LOAD "src\test\resources\test2.robo"
     emit
     cr
 
-: error ." This is an error message" ;
+: error ." This is an example message" CR ;
 
 : SQUARED ( n -- nsquared x )
  DUP *  ;
@@ -47,4 +52,4 @@ error
 
   : TEST   10 0 DO  CR ." Hello "  LOOP ;
 
-  TEST
+\  TEST

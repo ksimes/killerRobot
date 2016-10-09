@@ -26,7 +26,7 @@ public class Dictionary {
         compiledCode = new ArrayList<>();
         // Add in compile ":"
         compiledCode.add(new MemoryEntry(OpCode.toCompileMode));
-        addWord(new Word(":", compiledCode));
+        addWord(new Word(":", compiledCode, true));
 
         compiledCode = new ArrayList<>();
         // Add in finish compile ";"

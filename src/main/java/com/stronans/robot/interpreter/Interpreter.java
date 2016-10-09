@@ -1,18 +1,19 @@
 package com.stronans.robot.interpreter;
 
+import com.google.common.base.Optional;
 import com.stronans.robot.Settings;
 import com.stronans.robot.core.*;
 import com.stronans.robot.fileprocessing.ProcessFile;
 import com.stronans.robot.interpreter.exceptions.QuitException;
 import com.stronans.robot.interpreter.exceptions.StackEmptyException;
-import com.stronans.robot.interpreter.exceptions.UnrecognisedWordException;
+import com.stronans.robot.interpreter.exceptions.UnrecognisedTokenException;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
 /**
- * Handles the processing of Opcodes to produce actions.
+ * Handles the processing of Tokens in the input stream to produce actions.
  * Created by S.King on 07/02/2015.
  */
 public class Interpreter {
@@ -26,6 +27,7 @@ public class Interpreter {
     private Compiler compileWord = new Compiler();
     private RunningMode runMode = RunningMode.interpret;
     private Token token;
+    private SpecialOpcodes specialOpCodes = new SpecialOpcodes();
 
     public Interpreter(Settings settings, BufferedInputStream characterStream) {
         this.settings = settings;
@@ -38,55 +40,52 @@ public class Interpreter {
 
         try {
             while (token.getToken()) {
-                switch (runMode) {
-                    case interpret:
-                        if (token.isWord()) {
-                            Word word = token.lookupWord();
-                            if (settings.isVerbose()) {
-                                System.out.println("Word execute : [" + token.asText() + "]");
-                            }
-                            runMode = execute(word, runMode);
-                        } else if (token.isNumber()) {
-                            dataStack.push(token.asNumber());
 
-                            if (settings.isVerbose()) {
-                                System.out.println("Number : [" + token.asText() + "]");
+                Optional<Word> aWord = token.asWord();
+                if (aWord.isPresent()) {
+                    Word word = aWord.get();
+
+                    if (settings.isVerbose()) {
+                        System.out.println("Have word : [" + token.asText() + "]");
+                    }
+
+                    if ((runMode == RunningMode.interpret) || word.isImmediate()) {
+                        runMode = execute(word, runMode);
+                    } else {
+                        compileWord.addWord(word);
+                    }
+                } else {
+                    Optional<Long> aNumber = token.asNumber();
+                    if (aNumber.isPresent()) {
+
+                        if (settings.isVerbose()) {
+                            System.out.println("Have number : [" + token.asText() + "]");
+                        }
+
+                        if (runMode == RunningMode.interpret) {
+                            dataStack.push(aNumber.get());
+                        } else {
+                            compileWord.addNumber(aNumber.get());
+                        }
+
+                    } else {
+                        if (runMode == RunningMode.compile) {
+                            Optional<OpCode> opCode = token.asOpCode();
+                            if (opCode.isPresent()) {
+                                compileWord.addOpCode(token.asOpCode().get());
+                            } else {
+                                throw new UnrecognisedTokenException(token.asText());
                             }
                         } else {
                             if (logger.isTraceEnabled()) {
                                 logger.trace("Word not found : [" + token.asText() + "] - token");
                             }
                             System.out.println(token.asText() + " ?");
-                            break;
                         }
-                        break;
-
-                    case startCompile:
-                        runMode = compileWord.startWord(token.asText());
-                        break;
-
-                    case compile:
-                        if (token.isWord()) {
-                            Word word = token.lookupWord();
-
-                            if (word.isImmediate()) {
-                                runMode = execute(word, runMode);
-                            } else {
-                                compileWord.addWord(word);
-                            }
-                        } else {
-                            if (token.isOpCode()) {
-                                compileWord.addOpCode(token.asOpCode());
-                            } else if (token.isNumber()) {
-                                compileWord.addNumber(token.asNumber());
-                            } else {
-                                throw new UnrecognisedWordException(token.asText());
-                            }
-                            break;
-                        }
+                    }
                 }
             }
-        } catch (UnrecognisedWordException uwe) {
+        } catch (UnrecognisedTokenException uwe) {
             System.err.println(uwe.getMessage());
             abort();
         } catch (StackEmptyException see) {
@@ -158,23 +157,27 @@ public class Interpreter {
                             break;
 
                         case toCompileMode:
-                            runMode = RunningMode.startCompile;
+                            if (runMode == RunningMode.interpret) {
+                                // Get the next token and this is the new word.
+                                token.getToken();
+                                compileWord.startWord(token.asText());
+                            }
+                            runMode = RunningMode.compile;
                             break;
 
                         case ifTest:
                             switch (runMode) {
                                 case interpret:
-                                    // If there is a non-zero values on TOS then move past the THEN address
-                                    // pushed into the next address.
-                                    if (dataStack.pop() != 0) {
-                                        codePointer++;
-                                    }
+                                    // No operate in interpret mode.
                                     break;
 
                                 case compile:
-                                    compileWord.addOpCode(OpCode.ifTest);
+                                    // If there is a non-zero values on TOS then move past the THEN address
+                                    // pushed into the next address.
+                                    compileWord.addOpCode(OpCode.popA);
+                                    compileWord.addOpCode(OpCode.jumpANEq0);
                                     compileWord.addAddress(-1);
-                                    returnStack.push(compileWord.getCodePointer());
+                                    returnStack.push(compileWord.getCodePointer());  // addressR
                                     break;
                             }
                             break;
@@ -310,8 +313,15 @@ public class Interpreter {
                                     break;
                             }
 
-                        case jumpEqAB :     // If register A == B then skip next memory location
+                        case jumpEqAB:     // If register A == B then skip next memory location
                             if (registerA == registerB) {
+                                codePointer++;
+                            }
+                            break;
+
+                        // Jump if A Not Equal to zero
+                        case jumpANEq0:     // If register A != 0 then skip next memory location
+                            if (registerA != 0) {
                                 codePointer++;
                             }
                             break;
@@ -450,6 +460,10 @@ public class Interpreter {
                 break;
 
             case pushAddressR:
+                break;
+
+            default:
+                specialOpCodes.execute(code, registerA);
                 break;
         }
     }
