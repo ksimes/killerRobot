@@ -27,6 +27,7 @@ public class Interpreter {
     private Compiler compileWord = new Compiler();
     private RunningMode runMode = RunningMode.interpret;
     private Token token;
+    private SpecialOpcodes specialOpCodes = new SpecialOpcodes();
 
     public Interpreter(Settings settings, BufferedInputStream characterStream) {
         this.settings = settings;
@@ -459,6 +460,10 @@ public class Interpreter {
                 break;
 
             case pushAddressR:
+                break;
+
+            default:
+                specialOpCodes.execute(code, registerA);
                 break;
         }
     }

@@ -54,3 +54,13 @@
 : SPACE 32 EMIT ;
 : SPACES 0 DO 32 EMIT LOOP ;
 : WORDS |dumpDictionary ;
+
+( Robot control )
+: FORWARD |popA |Forwards ;
+: STOP |Stop ;
+: BACKWARDS |popA |Backwards ;
+: PAUSE |popA |Pause ;
+: LEFT |popA |Left ;
+: RIGHT |popA |Right ;
+: HARDLEFT |popA |HardLeft ;
+: HARDRIGHT |popA |HardRight ;

@@ -1,0 +1,4 @@
+   ( Test of controlling words for motors )
+    : FIRSTRUN 10 FORWARD 5 PAUSE 10 BACKWARDS STOP ;
+
+    FIRSTRUN
