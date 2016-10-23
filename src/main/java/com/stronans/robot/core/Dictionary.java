@@ -6,7 +6,7 @@ import java.util.*;
  * Holds the Word dictionary for the FORTH controller language.
  * Created by S.King on 07/02/2015.
  */
-public class Dictionary {
+public final class Dictionary {
 
     Map<String, Word> listing = new HashMap<>(200);
     private Word lastWordAdded = null;

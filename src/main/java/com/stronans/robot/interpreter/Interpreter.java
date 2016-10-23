@@ -1,16 +1,19 @@
 package com.stronans.robot.interpreter;
 
-import com.google.common.base.Optional;
 import com.stronans.robot.Settings;
 import com.stronans.robot.core.*;
 import com.stronans.robot.fileprocessing.ProcessFile;
 import com.stronans.robot.interpreter.exceptions.QuitException;
 import com.stronans.robot.interpreter.exceptions.StackEmptyException;
 import com.stronans.robot.interpreter.exceptions.UnrecognisedTokenException;
+import com.stronans.sensors.Sensors;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.util.Optional;
+
+import static com.stronans.robot.core.OpCode.quitOut;
 
 /**
  * Handles the processing of Tokens in the input stream to produce actions.
@@ -28,6 +31,7 @@ public class Interpreter {
     private RunningMode runMode = RunningMode.interpret;
     private Token token;
     private SpecialOpcodes specialOpCodes = new SpecialOpcodes();
+    private Word lastWord = null;
 
     public Interpreter(Settings settings, BufferedInputStream characterStream) {
         this.settings = settings;
@@ -46,7 +50,7 @@ public class Interpreter {
                     Word word = aWord.get();
 
                     if (settings.isVerbose()) {
-                        System.out.println("Have word : [" + token.asText() + "]");
+                        Common.outputln("Have word : [" + token.asText() + "]");
                     }
 
                     if ((runMode == RunningMode.interpret) || word.isImmediate()) {
@@ -54,12 +58,13 @@ public class Interpreter {
                     } else {
                         compileWord.addWord(word);
                     }
+                    lastWord = word;
                 } else {
                     Optional<Long> aNumber = token.asNumber();
                     if (aNumber.isPresent()) {
 
                         if (settings.isVerbose()) {
-                            System.out.println("Have number : [" + token.asText() + "]");
+                            Common.outputln("Have number : [" + token.asText() + "]");
                         }
 
                         if (runMode == RunningMode.interpret) {
@@ -72,7 +77,7 @@ public class Interpreter {
                         if (runMode == RunningMode.compile) {
                             Optional<OpCode> opCode = token.asOpCode();
                             if (opCode.isPresent()) {
-                                compileWord.addOpCode(token.asOpCode().get());
+                                compileWord.addOpCode(opCode.get());
                             } else {
                                 throw new UnrecognisedTokenException(token.asText());
                             }
@@ -80,18 +85,18 @@ public class Interpreter {
                             if (logger.isTraceEnabled()) {
                                 logger.trace("Word not found : [" + token.asText() + "] - token");
                             }
-                            System.out.println(token.asText() + " ?");
+                            Common.outputln(token.asText() + " ?");
                         }
                     }
                 }
             }
         } catch (UnrecognisedTokenException uwe) {
-            System.err.println(uwe.getMessage());
+            Common.outputln(uwe.getMessage());
             abort();
         } catch (StackEmptyException see) {
-            System.err.println(see.getMessage());
+            Common.outputln(see.getMessage());
         } catch (QuitException q) {
-            System.err.println("Quit");
+            Common.outputln("Quit");
         }
     }
 
@@ -103,6 +108,15 @@ public class Interpreter {
         registerB = 0;
     }
 
+    /**
+     * Steps over characters until the delimiting character is found.
+     * Used in processing comments and moving from the end of words to and special delimiters
+     * before staring processing, such as LOAD    "
+     *
+     * @param fis       file input stream to read
+     * @param delimiter character to stop reading at. Read position over to next character.
+     * @throws IOException
+     */
     private void readToCharacter(BufferedInputStream fis, char delimiter) throws IOException {
         boolean finished;
         int content;
@@ -119,7 +133,7 @@ public class Interpreter {
         while (!finished);
     }
 
-    public RunningMode execute(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
+    private RunningMode execute(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
 
         for (int codePointer = 0; codePointer < word.getCode().size(); codePointer++) {
 
@@ -128,6 +142,7 @@ public class Interpreter {
             switch (command.getType()) {
                 case Word:
                     runMode = execute(command.getWord(), runMode);
+                    lastWord = command.getWord();
                     break;
 
                 case Number:
@@ -166,47 +181,32 @@ public class Interpreter {
                             break;
 
                         case ifTest:
-                            switch (runMode) {
-                                case interpret:
-                                    // No operate in interpret mode.
-                                    break;
-
-                                case compile:
-                                    // If there is a non-zero values on TOS then move past the THEN address
-                                    // pushed into the next address.
-                                    compileWord.addOpCode(OpCode.popA);
-                                    compileWord.addOpCode(OpCode.jumpANEq0);
-                                    compileWord.addAddress(-1);
-                                    returnStack.push(compileWord.getCodePointer());  // addressR
-                                    break;
+                            // Does nothing in interpret mode.
+                            if (runMode == RunningMode.compile) {
+                                // If there is a non-zero values on TOS then move past the THEN address
+                                // pushed into the next address.
+                                compileWord.addOpCode(OpCode.popA);
+                                compileWord.addOpCode(OpCode.jumpANEq0);
+                                compileWord.addAddress(-1);
+                                returnStack.push(compileWord.getCodePointer());  // addressR
                             }
                             break;
 
                         case thenJump:
-                            switch (runMode) {
-                                case interpret:
-                                    // No operate in interpret mode.
-                                    break;
-
-                                case compile:
-                                    long jumpPointer = returnStack.pop();
-                                    compileWord.pokeAddress(jumpPointer, compileWord.getCodePointer());
-                                    break;
+                            // Does nothing in interpret mode.
+                            if (runMode == RunningMode.compile) {
+                                long jumpPointer = returnStack.pop();
+                                compileWord.pokeAddress(jumpPointer, compileWord.getCodePointer());
                             }
                             break;
 
                         case elseJump:
-                            switch (runMode) {
-                                case interpret:
-                                    // No operate in interpret mode.
-                                    break;
-
-                                case compile:
-                                    long jumpPointer = returnStack.pop();
-                                    compileWord.addAddress(-1);
-                                    returnStack.push(compileWord.getCodePointer());
-                                    compileWord.pokeAddress(jumpPointer, compileWord.getCodePointer());
-                                    break;
+                            // Does nothing in interpret mode.
+                            if (runMode == RunningMode.compile) {
+                                long jumpPointer = returnStack.pop();
+                                compileWord.addAddress(-1);
+                                returnStack.push(compileWord.getCodePointer());
+                                compileWord.pokeAddress(jumpPointer, compileWord.getCodePointer());
                             }
                             break;
 
@@ -281,13 +281,9 @@ public class Interpreter {
                             break;
 
                         case begin:
-                            switch (runMode) {
-                                case interpret:
-                                    break;
-
-                                case compile:
-                                    returnStack.push(compileWord.getCodePointer());
-                                    break;
+                            // Does nothing in interpret mode.
+                            if (runMode == RunningMode.compile) {
+                                returnStack.push(compileWord.getCodePointer());
                             }
                             break;
 
@@ -312,6 +308,7 @@ public class Interpreter {
                                     compileWord.addOpCode(OpCode.quit);
                                     break;
                             }
+                            break;
 
                         case jumpEqAB:     // If register A == B then skip next memory location
                             if (registerA == registerB) {
@@ -324,6 +321,47 @@ public class Interpreter {
                             if (registerA != 0) {
                                 codePointer++;
                             }
+                            break;
+
+                        case buildVariable:
+                            // Get the next token and this is the new variable word.
+                            token.getToken();
+                            compileWord.startWord(token.asText());
+                            compileWord.addOpCode(quitOut);
+                            compileWord.addNumber(0L);
+                            settings.getDictionary().addWord(compileWord.getAsWordListing());
+                            break;
+
+                        case quitOut:
+                            codePointer = word.getCode().size();
+                            break;
+
+                        case storeVariable:
+                            if (lastWord != null) {
+                                MemoryEntry entry = lastWord.getCode().get(0);
+                                if (entry.getType() == MemoryType.OpCode && entry.getOperation() == quitOut) {
+                                    MemoryEntry me = new MemoryEntry(registerA);
+                                    lastWord.getCode().set(1, me);
+                                }
+                            }
+                            break;
+
+                        case fetchVariable:
+                            if (lastWord != null) {
+                                MemoryEntry entry = lastWord.getCode().get(0);
+                                if (entry.getType() == MemoryType.OpCode && entry.getOperation() == quitOut) {
+                                    entry = lastWord.getCode().get(1);
+                                    dataStack.push(entry.getNumber());
+                                }
+                            }
+                            break;
+
+                        case buildConstant:
+                            // Get the next token and this is the new variable word.
+                            token.getToken();
+                            compileWord.startWord(token.asText());
+                            compileWord.addNumber(registerA);
+                            settings.getDictionary().addWord(compileWord.getAsWordListing());
                             break;
 
                         default:
@@ -446,6 +484,7 @@ public class Interpreter {
                 break;
 
             case distance:
+                dataStack.push(Sensors.getSensorData(registerA));
                 break;
 
             case load:

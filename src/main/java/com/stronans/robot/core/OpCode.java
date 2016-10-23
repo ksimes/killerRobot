@@ -50,7 +50,7 @@ public enum OpCode {
     quit,
     load,
     step,               // (n n n -- ) Steps, side, precision
-    distance,           // ( -- n)
+    distance,           // ( n n)
 
     Forwards,
     Stop,
@@ -60,7 +60,15 @@ public enum OpCode {
     HardLeft,
     HardRight,
     Shutdown,
-    Pause
+    Pause,
+
+    buildVariable,
+    quitOut,
+    storeVariable,
+    fetchVariable,
+    buildConstant,
+
+    picture
     ;
 
     public static OpCode fromString(String name) {
