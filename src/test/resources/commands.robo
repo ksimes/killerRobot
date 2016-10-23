@@ -1,15 +1,5 @@
 ( comment )
 
-( Movement )
-: step @step ;      ( param number of [default 1cm?] steps, param side, param precision[torque])
-: turnLeft ;    ( param degrees )
-: rightLeft ;   ( param degrees )
-
-( Events )
-: distance @distance ;    ( return distance to any obstacle? )
-: picture ;     ( take a single picture with on board camera )
-: video ;       ( param seconds - take a video with on board camera )
-
 ( Futures )
 : eyeLeft ;     ( param degrees - turn on board camera left )
 : eyeRight ;    ( param degrees )

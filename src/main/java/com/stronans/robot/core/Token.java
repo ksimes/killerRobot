@@ -1,9 +1,9 @@
 package com.stronans.robot.core;
 
-import com.google.common.base.Optional;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Processing of the current buffered input stream into tokens and identifying the content of those tokens.
@@ -80,7 +80,7 @@ public final class Token {
         Word word = dictionary.lookup(tokenContent);
 
         if (word == null)
-            return Optional.absent();
+            return Optional.empty();
         else
             return Optional.of(word);
     }
@@ -97,7 +97,7 @@ public final class Token {
             result = Long.parseLong(tokenContent);
 
         } catch (NumberFormatException e) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(result);
@@ -127,7 +127,7 @@ public final class Token {
         }
 
         if (opCode == null)
-            return Optional.absent();
+            return Optional.empty();
         else
             return Optional.of(opCode);
     }

@@ -11,17 +11,17 @@ import org.apache.log4j.Logger;
 import static com.stronans.motozero.motors.MotorController.DRIVER;
 
 /**
- * Handles the special OpCodes which control the Track motors.
+ * Handles the special OpCodes which control the Robot motors.
  *
  * Created by S.King on 08/10/2016.
  */
-public class SpecialOpcodes {
+class SpecialOpcodes {
     private static final Logger logger = Logger.getLogger(SpecialOpcodes.class);
     private MessageBus messageBus = MessageBus.getInstance();
     private ObjectMapper mapper = new ObjectMapper();
 
 
-    public void execute(OpCode opcode, Long register) {
+    void execute(OpCode opcode, Long register) {
         switch (opcode) {
             case Forwards:
                 sendMessage(MotorMessages.Forwards, register);
@@ -65,7 +65,9 @@ public class SpecialOpcodes {
         MotorMessage payload = new MotorMessage(message.name(), speed.intValue());
 
         try {
-            messageBus.addMessage(DRIVER, mapper.writeValueAsString(payload));
+            String data = mapper.writeValueAsString(payload);
+            logger.debug("outgoing msg : " + data);
+            messageBus.addMessage(DRIVER, data);
         } catch (JsonProcessingException jpe) {
             logger.error(" ==>> FAILED TO SERIALISE JSON MESSAGE: " + jpe.getMessage(), jpe);
         }

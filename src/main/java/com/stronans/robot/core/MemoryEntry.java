@@ -1,16 +1,17 @@
 package com.stronans.robot.core;
 
 /**
+ * Simple POJO for holding a memory entry
  *
  * Created by S.King on 07/02/2015.
  */
 public final class MemoryEntry {
-    MemoryType type;
-    OpCode operation;
-    long number;
-    Word word;
-    String stringKey;
-    int address;
+    private MemoryType type;
+    private OpCode operation;
+    private long number;
+    private Word word;
+    private String stringKey;
+    private int address;
 
     public MemoryEntry(OpCode operation) {
         type = MemoryType.OpCode;

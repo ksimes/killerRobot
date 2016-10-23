@@ -1,6 +1,7 @@
 package com.stronans.robot.fileprocessing;
 
 import com.stronans.robot.Settings;
+import com.stronans.robot.core.Common;
 import com.stronans.robot.core.Dictionary;
 import com.stronans.robot.core.StringLibrary;
 import com.stronans.robot.interpreter.Interpreter;
@@ -42,7 +43,7 @@ public class ProcessFile {
             }
 
             if (settings.isVerbose()) {
-                System.out.println("Total file size to read (in bytes) : " + characterStream.available());
+                Common.outputln("Total file size to read (in bytes) : " + characterStream.available());
             }
 
             Interpreter interpreter = new Interpreter(settings, characterStream);

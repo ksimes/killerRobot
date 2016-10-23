@@ -1,0 +1,59 @@
+( Definition of an object avoidance program )
+
+LOAD "constants.robo"
+
+( Test of controlling words for motors )
+: FIRSTRUN
+    ." Forward" CR
+    10 FORWARD
+    ." Pause" CR
+    5 PAUSE
+    ." Backwards" CR
+    10 BACKWARDS
+    ." Pause" CR
+    5 PAUSE
+    STOP ;
+
+FIRSTRUN
+
+5 PAUSE
+
+10 Constant MinDistance
+
+Variable LeftSensor
+Variable CenterSensor
+Variable RightSensor
+
+: MAIN
+  10 0 Do
+    10 FORWARD
+
+    1 distance LeftSensor !
+    2 distance CenterSensor !
+    3 distance RightSensor !
+
+    LeftSensor @ DUP -1 = If
+     ." Invalid Left value" CR
+    else
+        MinDistance < If
+            1000 RIGHT
+    Then
+
+    CenterSensor @ DUP -1 = If
+     ." Invalid Center value" cr
+    else
+        MinDistance < If
+            2000 LEFT
+    then
+
+    RightSensor @ DUP -1 = If
+     ." Invalid Right value" cr
+    else
+        MinDistance < If
+            2000 LEFT
+    then
+
+    1 pause
+  loop ;
+
+  Main
