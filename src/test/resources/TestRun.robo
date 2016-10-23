@@ -16,7 +16,7 @@ LOAD "constants.robo"
 
 FIRSTRUN
 
-10 PAUSE
+5 PAUSE
 
 10 Constant MinDistance
 
@@ -25,33 +25,35 @@ Variable CenterSensor
 Variable RightSensor
 
 : MAIN
-  30 0 Do
+  10 0 Do
     10 FORWARD
 
     1 distance LeftSensor !
     2 distance CenterSensor !
     3 distance RightSensor !
 
-    LeftSensor @ DUP = -1 If
-     ." Invalid Left value"
+    LeftSensor @ DUP -1 = If
+     ." Invalid Left value" CR
     else
         MinDistance < If
             1000 RIGHT
     Then
 
-    CenterSensor @ DUP = -1 If
-     ." Invalid Center value"
+    CenterSensor @ DUP -1 = If
+     ." Invalid Center value" cr
     else
         MinDistance < If
             2000 LEFT
     then
 
-    RightSensor @ DUP = -1 If
-     ." Invalid Right value"
+    RightSensor @ DUP -1 = If
+     ." Invalid Right value" cr
     else
         MinDistance < If
             2000 LEFT
     then
+
+    1 pause
   loop ;
 
   Main

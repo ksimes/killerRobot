@@ -66,7 +66,7 @@ class SpecialOpcodes {
 
         try {
             String data = mapper.writeValueAsString(payload);
-            logger.info("outgoing msg : " + data);
+            logger.debug("outgoing msg : " + data);
             messageBus.addMessage(DRIVER, data);
         } catch (JsonProcessingException jpe) {
             logger.error(" ==>> FAILED TO SERIALISE JSON MESSAGE: " + jpe.getMessage(), jpe);

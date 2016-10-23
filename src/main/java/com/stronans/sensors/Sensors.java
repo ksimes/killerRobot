@@ -72,6 +72,7 @@ public class Sensors implements Runnable {
 
     public void shutdown() {
         finished = true;
+        comms.endComms();
     }
 
 
