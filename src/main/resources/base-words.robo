@@ -55,12 +55,25 @@
 : SPACES 0 DO 32 EMIT LOOP ;
 : WORDS |dumpDictionary ;
 
+( Variables and constants )
+: CONSTANT |popA |buildConstant ; IMMEDIATE
+: VARIABLE |buildVariable ; IMMEDIATE
+: ! |popA |storeVariable ;
+: @ |fetchVariable ;
+: ? @ . ;
+
 ( Robot control )
-: FORWARD |popA |Forwards ;
+: FORWARD |popA |Forwards ;     ( Moves the Robot forward at a given speed 0 - 10 )
 : STOP |Stop ;
-: BACKWARDS |popA |Backwards ;
-: PAUSE |popA |Pause ;
-: LEFT |popA |Left ;
-: RIGHT |popA |Right ;
-: HARDLEFT |popA |HardLeft ;
-: HARDRIGHT |popA |HardRight ;
+: BACKWARDS |popA |Backwards ;  ( Moves the Robot backwards at a given speed 0 - 10 )
+: PAUSE |popA |Pause ;          ( Pauses the motor processing thread for a given number of Microseconds )
+: LEFT |popA |Left ;            ( Turns the Robot left for a given number of degrees )
+: RIGHT |popA |Right ;          ( Turns the Robot right for a given number of degrees )
+: HARDLEFT |popA |HardLeft ;    ( Turns the Robot left in position for a given number of degrees )
+: HARDRIGHT |popA |HardRight ;  ( Turns the Robot right in position for a given number of degrees )
+
+( Events )
+: DISTANCE |popA |distance ;    ( return distance to any obstacle by a given UltraSonic sensor  n - n )
+: PICTURE |picture ;            ( take a single picture with on board camera )
+: VIDEO ;                       ( param seconds - take a video with on board camera )
+

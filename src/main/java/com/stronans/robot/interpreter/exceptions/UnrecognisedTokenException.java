@@ -5,6 +5,8 @@ package com.stronans.robot.interpreter.exceptions;
  */
 public class UnrecognisedTokenException extends Exception {
 
+    private static final long serialVersionUID = 01L;
+
     public UnrecognisedTokenException(String message) {
         super(message + " ?");
     }

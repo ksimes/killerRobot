@@ -9,9 +9,12 @@ Requires Libraries:
 messagebus
 motozero
 
-To Build Library
-================
+To Build this application
+=========================
+Ensure that the above libraries are up-to-date and included in the lib directory of this project.
 Use SBT and the command:
 
 sbt clean assembly
+
+This will produce an executable jar in the form *robot-assembly-x.x.x.jar*
 

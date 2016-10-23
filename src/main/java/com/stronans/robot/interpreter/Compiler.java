@@ -1,7 +1,9 @@
 package com.stronans.robot.interpreter;
 
-import com.google.common.base.Optional;
-import com.stronans.robot.core.*;
+import com.stronans.robot.core.MemoryEntry;
+import com.stronans.robot.core.OpCode;
+import com.stronans.robot.core.RunningMode;
+import com.stronans.robot.core.Word;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -12,12 +14,12 @@ import java.util.List;
  * <p/>
  * Created by S.King on 07/02/2015.
  */
-public class Compiler {
+class Compiler {
     private static final Logger logger = Logger.getLogger(Compiler.class);
     private String name;
     private List<MemoryEntry> compiledCode = null;
 
-    public RunningMode startWord(String token) {
+    RunningMode startWord(String token) {
         RunningMode result = RunningMode.compile;
 
         // Clear the new Word buffers and prepare to create a new Word.
@@ -31,7 +33,7 @@ public class Compiler {
         return result;
     }
 
-    public long getCodePointer() {
+    long getCodePointer() {
         if (logger.isTraceEnabled()) {
             logger.trace("get code Pointer : [" + (compiledCode.size() - 1) + "]");
         }
@@ -39,7 +41,7 @@ public class Compiler {
         return compiledCode.size() - 1;
     }
 
-    public Word getAsWordListing() {
+    Word getAsWordListing() {
         if (logger.isTraceEnabled()) {
             logger.trace("Start of Word dump : " + name);
             int counter = 0;
@@ -73,7 +75,7 @@ public class Compiler {
         return new Word(name, compiledCode);
     }
 
-    public void addWord(Word word) {
+    void addWord(Word word) {
         MemoryEntry me = new MemoryEntry(word);
         compiledCode.add(me);
 
@@ -82,7 +84,7 @@ public class Compiler {
         }
     }
 
-    public void addAddress(long codePointer) {
+    void addAddress(long codePointer) {
         MemoryEntry me = new MemoryEntry((int) codePointer);
         compiledCode.add(me);
 
@@ -91,7 +93,7 @@ public class Compiler {
         }
     }
 
-    public void pokeAddress(long codePointer, long newAddress) {
+    void pokeAddress(long codePointer, long newAddress) {
         if (logger.isTraceEnabled()) {
             logger.trace("Poke address : [cp:" + codePointer + " na:" + newAddress + "]");
         }
@@ -99,7 +101,7 @@ public class Compiler {
         compiledCode.set((int) codePointer, me);
     }
 
-    public void addNumber(Long number) {
+    void addNumber(Long number) {
 
         MemoryEntry me = new MemoryEntry(number);
         compiledCode.add(me);
@@ -109,7 +111,7 @@ public class Compiler {
         }
     }
 
-    public void addOpCode(OpCode token) {
+    void addOpCode(OpCode token) {
         MemoryEntry me = new MemoryEntry(token);
         compiledCode.add(me);
 
@@ -119,7 +121,7 @@ public class Compiler {
 
     }
 
-    public void addStringKey(String key) {
+    void addStringKey(String key) {
         MemoryEntry me = new MemoryEntry(key);
         compiledCode.add(me);
 

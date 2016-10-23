@@ -5,6 +5,8 @@ package com.stronans.robot.interpreter.exceptions;
  */
 public class QuitException extends Exception {
 
+    private static final long serialVersionUID = 01L;
+
     public QuitException(String message) {
         super(message + " ?");
     }

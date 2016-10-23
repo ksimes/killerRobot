@@ -1,0 +1,7 @@
+( Holds all of teh constants used in the Robot FORTH programming )
+
+( Sensors )
+1 CONSTANT LEFT-ULTRA
+2 CONSTANT CENTER-ULTRA
+3 CONSTANT RIGHT-ULTRA
+

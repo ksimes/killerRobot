@@ -8,7 +8,9 @@ import java.util.Stack;
  *
  * Created by S.King on 23/02/2015.
  */
-public class CoreStack extends Stack<Long> {
+public final class CoreStack extends Stack<Long> {
+    private static final long serialVersionUID = 01L;
+
     @Override
     public synchronized Long pop() throws StackEmptyException {
         if(super.empty())
