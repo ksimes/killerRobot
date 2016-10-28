@@ -44,16 +44,22 @@ public class RobotStartup {
             System.out.println("Application will continue but without any logging.");
         }
 
-        ProcessGoals processGoals = new ProcessGoals();
-        processGoals.processArguments(args);
+        ProcessGoals processGoals = new ProcessGoals(args);
+        processGoals.processFileArguments();
     }
 
     private static final class ProcessGoals {
-        Settings settings = new Settings();
-        Sensors sensors;
-        MotorController motorController;
+        private Settings settings = new Settings();
+        private Sensors sensors;
+        private MotorController motorController;
+        private String[] programArgs;
 
-        ProcessGoals() {
+        ProcessGoals(String[] args) {
+
+            programArgs = args;
+            // See if there are any arguments which will affect the setting of controllers in this initialiser.
+            processInitalArguments(args);
+
             // Startup all of the threads which will handle:
             //   sight (Ultrasonic detectors)
             logger.info("Starting Sensor processing");
@@ -69,70 +75,72 @@ public class RobotStartup {
             //   wifi transmission and reception (updates of goals and reports to central data server)
             //   Camera
             //   accelerometer and magnetometer (position and direction)
+
+            // Load up all the words which will make the FORTH system work.
+            InputStream is = getClass().getResourceAsStream("/base-words.robo");
+            ProcessFile baseWordsContent = new ProcessFile(is, settings);
+            baseWordsContent.process();
         }
 
-        void shutdown()
-        {
+        void shutdown() {
             sensors.shutdown();
 //            motorController.shutdown();
         }
 
-        void processArguments(String[] args) {
-            int i = 0, j;
-            String arg;
-            char flag;
+        void processInitalArguments(String[] args) {
 
             logger.info("Program startup");
 
             for (String argument : args) {
                 logger.trace("program arguments : [" + argument + "]");
+
+                if (argument.startsWith("-")) {
+                    switch (argument) {
+                        case "-v":
+                        case "-verbose":
+                            settings.setVerbose(true);
+                            break;
+
+                        case "-t":
+                        case "-test":
+                            TESTING = true;
+                            break;
+
+                        case "-f":
+                        case "-file":
+                            // Do nothing. Handled in the next routine in chain.
+                            break;
+
+                        default:
+                            String msg = "Unrecognised argument : [" + argument + "]";
+                            logger.error(msg);
+                            Common.outputln(msg);
+                            break;
+                    }
+                }
             }
+        }
 
-            InputStream is = getClass().getResourceAsStream("/base-words.robo");
-            ProcessFile baseWordsContent = new ProcessFile(is, settings);
-            baseWordsContent.process();
 
-            while (i < args.length && args[i].startsWith("-")) {
-                arg = args[i++];
+        void processFileArguments() {
+            int i;
 
-                switch (arg) {
-                    case "-v":
-                    case "-verbose":
-                        settings.setVerbose(true);
-                        break;
-
-                    case "-f":
-                    case "-file":
-                        if (i < args.length) {
-                            ProcessFile pf = new ProcessFile(args[i++], settings);
-                            pf.process();
-                        } else {
-                            logger.error("-file requires a filename");
-                            Common.outputln("-file requires a filename");
-                        }
-                        break;
-
-//                    case "-t":
-//                    case "-test":
-//                        TESTING = true;
-//                        break;
-//
-                    default:
-                        for (j = 1; j < arg.length(); j++) {
-                            flag = arg.charAt(j);
-                            switch (flag) {
-//                                case 'x':
-//                                if (vflag) System.out.println("Option x");
-//                                    break;
-//                                case 'n':
-//                                if (vflag) System.out.println("Option n");
-//                                    break;
-                                default:
-                                    logger.error("illegal option " + flag);
-                                    Common.outputln("illegal option " + flag);
-                                    break;
+            for (i = 1; i < programArgs.length; i++) {
+                String argument = programArgs[i];
+                if (argument.startsWith("-f")) {
+                    switch (argument) {
+                        case "-f":
+                        case "-file":
+                            if (i < programArgs.length) {
+                                ProcessFile pf = new ProcessFile(programArgs[++i], settings);
+                                pf.process();
+                            } else {
+                                String msg = "-file requires a filename";
+                                logger.error(msg);
+                                Common.outputln(msg);
                             }
-                        }
+                            break;
+                    }
                 }
             }
 

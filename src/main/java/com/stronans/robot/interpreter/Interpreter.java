@@ -378,50 +378,62 @@ public class Interpreter {
         switch (code) {
             case pushA:     // Push contexts of A register to stack
                 dataStack.push(registerA);
+                logger.trace("Push to data stack registerA: " + registerA);
                 break;
 
             case pushB:     // Push contents of B register to stack
                 dataStack.push(registerB);
+                logger.trace("Push to data stack registerB: " + registerB);
                 break;
 
             case popA:      // Pop contexts of top of stack to reg A
                 registerA = dataStack.pop();
+                logger.trace("Pop to registerA: " + registerA);
                 break;
 
             case popB:      // Pop contexts of top of stack to reg B
                 registerB = dataStack.pop();
+                logger.trace("Pop to registerB: " + registerB);
                 break;
 
             case incA:
                 registerA++;
+                logger.trace("increment registerA to: " + registerA);
                 break;
 
             case decA:
                 registerA--;
+                logger.trace("decrement registerA to: " + registerA);
                 break;
 
             case incB:
                 registerB++;
+                logger.trace("increment registerB to: " + registerB);
                 break;
 
             case decB:
                 registerB--;
+                logger.trace("decrement registerB to: " + registerB);
                 break;
 
             case addAB:
                 registerA += registerB;
+                logger.trace("Add registerB to registerA: " + registerA);
                 break;
 
             case subAB:
                 registerA -= registerB;
+                logger.trace("Subtract registerB from registerA: " + registerA);
                 break;
 
             case mulAB:
                 registerA *= registerB;
+                logger.trace("Multiple registerB and registerA: " + registerA);
                 break;
 
             case divAB:
                 registerA /= registerB;
+                logger.trace("Divide registerA with registerB: " + registerA);
                 break;
 
             // Logic grouping
@@ -449,10 +461,12 @@ public class Interpreter {
 
             case processComment:
                 readToCharacter(characterStream, ')');
+                logger.trace("processComment");
                 break;
 
             case processComment2:
                 readToCharacter(characterStream, '\n');
+                logger.trace("processComment2");
                 break;
 
             case processString:
@@ -465,6 +479,7 @@ public class Interpreter {
                     case compile:
                         String stringKey = settings.getStringLibrary().add(data);
                         compileWord.addStringKey(stringKey);
+                        logger.trace("process String [" + data + "] compile to :" + stringKey);
                         break;
                 }
                 break;
@@ -478,6 +493,7 @@ public class Interpreter {
 
             case makeImmediate:
                 settings.getDictionary().makeLastWordImmediate();
+                logger.trace("Make last work immediate");
                 break;
 
             case step:
@@ -485,11 +501,13 @@ public class Interpreter {
 
             case distance:
                 dataStack.push(Sensors.getSensorData(registerA));
+                logger.trace("mesaure sensor " + registerA);
                 break;
 
             case load:
                 readToCharacter(characterStream, '"');
                 String filename = Common.processString(characterStream, '"');
+                logger.trace("Load file : " + filename);
                 ProcessFile pf = new ProcessFile(filename, settings);
                 pf.process();
                 break;

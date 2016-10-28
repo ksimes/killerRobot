@@ -1,27 +1,30 @@
-(
-1 0= . cr
+( Regression tests )
 
- -2 0< . cr
+ ." 2 2 = " 2 2 = TEST
 
--2 0> . cr
+." 1 2 < " 1 2 < TEST
 
-3 0> . cr
+ ." 1 0= INVERT " 1 0= INVERT TEST
 
-0 0= . cr
+." -2 0< "  -2 0<  TEST
 
-1 1 = . cr
+." -2 0> INVERT " -2 0> INVERT TEST
 
-2 1 = . cr
+." 3 0> " 3 0> TEST
 
-1 2 > . cr
+ ." 0 0= " 0 0= TEST
 
-2 1 > . cr
+." 1 1 = " 1 1 =  TEST
 
+  ." 2 1 = INVERT " 2 1 = INVERT  TEST
 
-: TEST1 1 = if ." is one so " 10 13 + . ." Some stuff " then ." and we're finished" cr ." new line" cr ." test" cr ;
+." 1 2 > INVERT " 1 2 > INVERT  TEST
 
-2 TEST1
-)
+  ." 2 1 > " 2 1 >  TEST
+
+: TESTFOR1 DUP 1 = if . ." is one so " 10 13 + . ." Some stuff " then ." and we're finished" cr ." new line" cr ." test" cr ;
+1 TESTFOR1
+2 TESTFOR1
 
  : ?DAY  DUP 32 = IF  ." Is thirtytwo " ELSE 15 = IF ." is fifteen " ELSE ." no idea " THEN THEN ;
 
@@ -30,21 +33,21 @@
 10 ?Day cr
 cr cr
 
-( numerator denominator -- quotient
+( numerator denominator -- quotient )
     : /CHECK
       DUP 0= IF  ." invalid " DROP
            ELSE /
            THEN ;
 
-4 2 /Check .
-)
+4 2 /Check . CR
+
 
     : EGGSIZE    DUP  18 < IF  ." reject "      ELSE
             DUP  21 < IF  ." small "       ELSE
             DUP  24 < IF  ." medium "      ELSE
             DUP  27 < IF  ." large "       ELSE
             DUP  30 < IF  ." extra large " ELSE
-                      ." error "
+                      ." over size "
             THEN THEN THEN THEN THEN DROP ;
 
 23 EGGSIZE cr

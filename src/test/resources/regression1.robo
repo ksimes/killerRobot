@@ -2,6 +2,9 @@
 
 : TEST IF ." Success" ELSE ." Failure" THEN CR ;
 
+( Arithmetic tests )
+." Arithmetic tests" CR
+
  1 2 + 200 + 4 / 4 * DUP . 200 = TEST
 
  -10 21 + DUP . 11 = TEST
@@ -10,20 +13,18 @@
 
  10 dup + dup . 20 = TEST
 
- 2 2 = TEST
+." Loading & processing logic tests" CR
 
- 1 2 < TEST
-
-." Loading & processing file" CR
-
-LOAD "src\test\resources\test2.robo"
+LOAD "src\test\resources\regression2.robo"
 
 ." Finished processing file" CR
 
- 20 4 / 5 = TEST
- 17 12 * 4 + 208 = TEST
+ 20 4 / 5 DUP . = TEST
+ 17 12 * 4 + 208 DUP . = TEST
 
- 10 DUP . . CR
+ ." DUP test = " 10 DUP . . CR
+
+ ." SWAP test 10 5 = " 10 5 SWAP . . cr
 
     42
     emit
@@ -34,22 +35,20 @@ LOAD "src\test\resources\test2.robo"
 : SQUARED ( n -- nsquared x )
  DUP *  ;
 
- : SUM-OF-SQUARES SQUARED SWAP SQUARED  +  ;
+ : SUM-OF-SQUARES SQUARED SWAP SQUARED +  ;
 
- 3 squared .
-3 4 SUM-OF-SQUARES .
-
-." this is a test string" cr
+." 3 squared = " 3 squared . cr
+." SUM-OF-SQUARES 3 4 = " 3 4 SUM-OF-SQUARES 25 = TEST
 
 error
 
  : STAR	 ( -- )            \ Print a single star
    42 EMIT ;	           \ 42 is the ASCII code for *
 
- star
+ star cr
 
  25 EGGSIZE cr
 
   : TEST   10 0 DO  CR ." Hello "  LOOP ;
 
-\  TEST
+TEST

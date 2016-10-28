@@ -25,31 +25,38 @@ public class Sensors implements Runnable {
 
     public Sensors(boolean testing) {
         this.testing = testing;
-        try {
-            comms = new SerialComms(SERIAL_PORT);
-            comms.startComms();
+        if (!testing) {
+            try {
+                comms = new SerialComms(SERIAL_PORT);
+                comms.startComms();
 
-        } catch (InterruptedException e) {
-            log.error(" ==>> PROBLEMS WITH SERIAL COMMUNICATIONS: " + e.getMessage(), e);
+            } catch (InterruptedException e) {
+                log.error(" ==>> PROBLEMS WITH SERIAL COMMUNICATIONS: " + e.getMessage(), e);
+            }
         }
     }
 
     private void processMessage(String rawMessage) {
         log.info("incomming msg : [" + rawMessage + "]");
 
-        try {
-            synchronized (Sensors.class) {
-                lastReading = mapper.readValue(rawMessage, SensorMessage.class);
+        if (!testing) {
+            try {
+                synchronized (Sensors.class) {
+                    lastReading = mapper.readValue(rawMessage, SensorMessage.class);
 
-                log.info("Last Reading : " + lastReading);
+                    log.info("Last Reading : " + lastReading);
+                }
+
+            } catch (JsonParseException jpe) {
+                // Throw away the corrupt message and go on to the next one.
+                log.error(" ==>> FAILED TO DESERIALISE JSON MESSAGE: " + jpe.getMessage());
+            } catch (Exception e) {
+                // Throw away the corrupt message and go on to the next one.
+                log.error(" ==>> EXCEPTION DESERIALISING JSON MESSAGE: " + e.getMessage());
             }
-
-        } catch (JsonParseException jpe) {
-            // Throw away the corrupt message and go on to the next one.
-            log.error(" ==>> FAILED TO DESERIALISE JSON MESSAGE: " + jpe.getMessage());
-        } catch (Exception e) {
-            // Throw away the corrupt message and go on to the next one.
-            log.error(" ==>> EXCEPTION DESERIALISING JSON MESSAGE: " + e.getMessage());
+        } else {
+            Distance distance = new Distance(20L, 20L, 20L);
+            lastReading = new SensorMessage(distance);
         }
     }
 
@@ -58,7 +65,13 @@ public class Sensors implements Runnable {
         try {
 
             while (!finished) {
-                String message = comms.messages().take();
+                String message;
+
+                if (!testing) {
+                    message = comms.messages().take();
+                } else {
+                    message = "";
+                }
 
                 processMessage(message);
             }
@@ -72,7 +85,9 @@ public class Sensors implements Runnable {
 
     public void shutdown() {
         finished = true;
-        comms.endComms();
+        if (!testing) {
+            comms.endComms();
+        }
     }
 
 

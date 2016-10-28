@@ -45,6 +45,7 @@
 : 0= |popA 0 |popB |equalAB |pushA ;
 : 0< |popA 0 |popB |lessAB |pushA ;
 : 0> |popA 0 |popB |greaterAB |pushA ;
+: INVERT 0= If 1 else 0 then ;
 
 ( display )
 : ." |processString ; IMMEDIATE
