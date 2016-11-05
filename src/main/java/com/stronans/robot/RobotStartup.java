@@ -125,7 +125,7 @@ public class RobotStartup {
         void processFileArguments() {
             int i;
 
-            for (i = 1; i < programArgs.length; i++) {
+            for (i = 0; i < programArgs.length; i++) {
                 String argument = programArgs[i];
                 if (argument.startsWith("-f")) {
                     switch (argument) {
