@@ -493,7 +493,7 @@ public class Interpreter {
 
             case makeImmediate:
                 settings.getDictionary().makeLastWordImmediate();
-                logger.trace("Make last work immediate");
+                logger.trace("Make last word immediate");
                 break;
 
             case step:
@@ -501,7 +501,7 @@ public class Interpreter {
 
             case distance:
                 dataStack.push(Sensors.getSensorData(registerA));
-                logger.trace("mesaure sensor " + registerA);
+                logger.trace("measure sensor " + registerA);
                 break;
 
             case load:

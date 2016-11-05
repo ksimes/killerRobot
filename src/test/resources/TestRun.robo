@@ -12,6 +12,8 @@
 
 FIRSTRUN
 
+2000 HARDLEFT           \ turn 180 degrees
+
 5 PAUSE
 
 ( Definition of an object avoidance program )
@@ -21,7 +23,7 @@ FIRSTRUN
 2 CONSTANT CENTER-ULTRA
 3 CONSTANT RIGHT-ULTRA
 
-10 Constant MinDistance
+15 Constant MinDistance     \ 15 cm minimum distance
 
 ( Sensor value storage )
 Variable LeftSensor
@@ -30,39 +32,32 @@ Variable RightSensor
 
 : MAIN
   10 0 Do
-    10 FORWARD      \ while going forward
-
-    ( Read the ultrasonic sensor values )
-    LEFT-ULTRA distance LeftSensor !
-    CENTER-ULTRA distance CenterSensor !
-    RIGHT-ULTRA distance RightSensor !
-
+    ( Read the ultrasonic sensor values, if not -1 then store otherwise use last value )
     ( always ignore out of range -1 )
-    LeftSensor @ DUP -1 = If
-     ." Invalid Left value" CR
-    else
-        MinDistance < If
-            1000 RIGHT
-    Then
+    LEFT-ULTRA distance DUP -1 = INVERT If LeftSensor ! THEN
+    CENTER-ULTRA distance DUP -1 = INVERT If CenterSensor ! THEN
+    RIGHT-ULTRA distance DUP -1 = INVERT If RightSensor ! THEN
 
-    CenterSensor @ DUP -1 = If
-     ." Invalid Center value" cr
+    CenterSensor @ MinDistance > if
+        10 FORWARD      \ go forward
     else
-        MinDistance < If
+        ( is the left less obstructed than the right )
+        LeftSensor @ RightSensor @ > if
             2000 LEFT
+        else
+            ( is the right less obstructed than the left )
+            RightSensor @ LeftSensor @ > if
+                2000 RIGHT
+            else
+                2000 HARDLEFT           \ turn 180 degrees
+            then
+        then
     then
 
-    RightSensor @ DUP -1 = If
-     ." Invalid Right value" cr
-    else
-        MinDistance < If
-            2000 LEFT
-    then
-
-    1 pause
+    1 pause     \ Pause a second and do it again
   loop
+
   stop
   ;
 
-
-  Main
+\  Main

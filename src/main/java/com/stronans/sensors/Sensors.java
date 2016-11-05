@@ -37,9 +37,9 @@ public class Sensors implements Runnable {
     }
 
     private void processMessage(String rawMessage) {
-        log.info("incomming msg : [" + rawMessage + "]");
-
         if (!testing) {
+            log.info("incomming msg : [" + rawMessage + "]");
+
             try {
                 synchronized (Sensors.class) {
                     lastReading = mapper.readValue(rawMessage, SensorMessage.class);
