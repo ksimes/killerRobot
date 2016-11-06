@@ -2,8 +2,6 @@ package com.stronans.robot.fileprocessing;
 
 import com.stronans.robot.Settings;
 import com.stronans.robot.core.Common;
-import com.stronans.robot.core.Dictionary;
-import com.stronans.robot.core.StringLibrary;
 import com.stronans.robot.interpreter.Interpreter;
 
 import java.io.*;

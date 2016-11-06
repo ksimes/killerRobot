@@ -17,7 +17,7 @@ public class Sensors implements Runnable {
     private boolean testing = false;
     private static SerialComms comms;
     private ObjectMapper mapper = new ObjectMapper();
-    private static SensorMessage lastReading;
+    private static SensorMessage lastReading = new SensorMessage(new Distance(-1L, -1L, -1L));
     private static boolean finished = false;
 
     public Sensors() {

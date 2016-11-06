@@ -141,21 +141,28 @@ public class Interpreter {
 
             switch (command.getType()) {
                 case Word:
-                    runMode = execute(command.getWord(), runMode);
-                    lastWord = command.getWord();
+                    Word exe = command.getWord();
+                    logger.trace("Execute Word : " + exe.getName());
+                    runMode = execute(exe, runMode);
+                    lastWord = exe;
                     break;
 
                 case Number:
-                    dataStack.push(command.getNumber());
+                    long number = command.getNumber();
+                    logger.trace("Push number : " + number);
+                    dataStack.push(number);
                     break;
 
                 case Address:
-                    if (command.getAddress() > -2) {
-                        codePointer = command.getAddress();
+                    int address = command.getAddress();
+                    logger.trace("Jump to word address : " + address);
+                    if (address > -2) {
+                        codePointer = address;
                     }
                     break;
 
                 case StringPointer:
+                    logger.trace("Emit string");
                     Common.emitString(settings.getStringLibrary().get(command.getStringKey()));
                     break;
 
@@ -528,6 +535,7 @@ public class Interpreter {
     private void logic(OpCode code) {
         switch (code) {
             case equalAB:       // Is reg A equal to Reg B
+                logger.trace("Equals RegA & RegB : " + registerA + " = " + registerB);
                 if (registerA == registerB)
                     registerA = 1;
                 else
@@ -535,6 +543,7 @@ public class Interpreter {
                 break;
 
             case lessAB:        // Is reg A less than Reg B
+                logger.trace("Less RegA & RegB : " + registerA + " < " + registerB);
                 if (registerA < registerB)
                     registerA = 1;
                 else
@@ -542,6 +551,7 @@ public class Interpreter {
                 break;
 
             case greaterAB:     // Is reg A greater than Reg B
+                logger.trace("Greater RegA & RegB : " + registerA + " > " + registerB);
                 if (registerA > registerB)
                     registerA = 1;
                 else

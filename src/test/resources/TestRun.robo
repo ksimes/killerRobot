@@ -10,7 +10,7 @@
     5 PAUSE
     STOP ;
 
-FIRSTRUN
+FIRSTRUN 
 
 2000 HARDLEFT           \ turn 180 degrees
 

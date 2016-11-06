@@ -64,12 +64,12 @@ public class RobotStartup {
             //   sight (Ultrasonic detectors)
             logger.info("Starting Sensor processing");
             sensors = new Sensors(TESTING);
-            Thread sensorsThread = new Thread(sensors);
+            Thread sensorsThread = new Thread(sensors, "Sensors");
             sensorsThread.start();
             //   movement (wheels and later legs)
             logger.info("Starting Motor Controller processing");
             motorController = new MotorController(TESTING);
-            Thread motorControl = new Thread(motorController);
+            Thread motorControl = new Thread(motorController, "Motors");
             motorControl.start();
             //   temperature and humidity checks
             //   wifi transmission and reception (updates of goals and reports to central data server)

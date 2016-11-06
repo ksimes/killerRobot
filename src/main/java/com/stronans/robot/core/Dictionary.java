@@ -8,7 +8,7 @@ import java.util.*;
  */
 public final class Dictionary {
 
-    Map<String, Word> listing = new HashMap<>(200);
+    private Map<String, Word> listing = new HashMap<>(200);
     private Word lastWordAdded = null;
 
     public Dictionary() {

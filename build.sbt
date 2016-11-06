@@ -2,7 +2,7 @@ import sbt.Keys._
 
 lazy val commonSettings = Seq(
   organization := "com.stronans",
-  version := "0.2.0",
+  version := "0.3.0",
   scalaVersion := "2.11.4",
   exportJars := true,
   // This forbids including Scala related libraries into the dependency
@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
 mainClass in assembly := Some("com.stronans.robot.RobotStartup")
 
 assemblyMergeStrategy in assembly := {
-  case "log4j.properties"	=> MergeStrategy.concat
+  case "log4j.properties"	=> MergeStrategy.first
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
