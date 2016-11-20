@@ -507,8 +507,9 @@ public class Interpreter {
                 break;
 
             case distance:
-                dataStack.push(Sensors.getSensorData(registerA));
-                logger.trace("measure sensor " + registerA);
+                long distance = Sensors.getSensorData(registerA);
+                dataStack.push(distance);
+                logger.trace("measure sensor [" + registerA + "] value = {" + distance + "}");
                 break;
 
             case load:

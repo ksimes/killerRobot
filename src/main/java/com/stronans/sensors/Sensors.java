@@ -90,7 +90,6 @@ public class Sensors implements Runnable {
         }
     }
 
-
     static public long getSensorData(long sensorID) {
         long result = 0;
         int sensorToRead = (int) sensorID;
@@ -98,15 +97,15 @@ public class Sensors implements Runnable {
         synchronized (Sensors.class) {
             switch (sensorToRead) {
                 case 1:     // Left side mounted ultrasonic sensor
-                    lastReading.getDistance().getLeft();
+                    result = lastReading.getDistance().getLeft();
                     break;
 
                 case 2:     // Center mounted ultrasonic sensor
-                    lastReading.getDistance().getCentre();
+                    result = lastReading.getDistance().getCentre();
                     break;
 
                 case 3:     // Right side mounted ultrasonic sensor
-                    lastReading.getDistance().getRight();
+                    result = lastReading.getDistance().getRight();
                     break;
             }
         }
