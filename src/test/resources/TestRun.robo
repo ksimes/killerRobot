@@ -1,21 +1,3 @@
-( Test of controlling words for motors )
-: FIRSTRUN
-    ." Forward" CR
-    10 FORWARD
-    ." Pause" CR
-    5 PAUSE
-    ." Backwards" CR
-    10 BACKWARDS
-    ." Pause" CR
-    5 PAUSE
-    STOP ;
-
-FIRSTRUN 
-
-2000 HARDLEFT           \ turn 180 degrees
-
-5 PAUSE
-
 ( Definition of an object avoidance program )
 
 ( Sensors constants )
@@ -23,7 +5,7 @@ FIRSTRUN
 2 CONSTANT CENTER-ULTRA
 3 CONSTANT RIGHT-ULTRA
 
-15 Constant MinDistance     \ 15 cm minimum distance
+10 Constant MinDistance     \ 15 cm minimum distance
 
 ( Sensor value storage )
 Variable LeftSensor
