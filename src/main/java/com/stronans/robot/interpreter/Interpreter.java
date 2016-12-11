@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.stronans.robot.core.OpCode.quitOut;
 
@@ -54,6 +55,10 @@ public class Interpreter {
                     }
 
                     if ((runMode == RunningMode.interpret) || word.isImmediate()) {
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Executing Word : [" + token.asText() + "]");
+                        }
+
                         runMode = execute(word, runMode);
                     } else {
                         compileWord.addWord(word);
@@ -68,6 +73,10 @@ public class Interpreter {
                         }
 
                         if (runMode == RunningMode.interpret) {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("Pushing number : [" + token.asText() + "]");
+                            }
+
                             dataStack.push(aNumber.get());
                         } else {
                             compileWord.addNumber(aNumber.get());
@@ -133,6 +142,11 @@ public class Interpreter {
         while (!finished);
     }
 
+    private void tracePoint(int codePointer, String data)
+    {
+        logger.trace("CP " + codePointer + " : " + data);
+    }
+
     private RunningMode execute(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
 
         for (int codePointer = 0; codePointer < word.getCode().size(); codePointer++) {
@@ -142,28 +156,29 @@ public class Interpreter {
             switch (command.getType()) {
                 case Word:
                     Word exe = command.getWord();
-                    logger.trace("Execute Word : " + exe.getName());
+                    tracePoint(codePointer, "Execute Word : " + exe.getName());
                     runMode = execute(exe, runMode);
                     lastWord = exe;
                     break;
 
                 case Number:
                     long number = command.getNumber();
-                    logger.trace("Push number : " + number);
+                    tracePoint(codePointer, "Push number : " + number);
                     dataStack.push(number);
                     break;
 
                 case Address:
                     int address = command.getAddress();
-                    logger.trace("Jump to word address : " + address);
+                    tracePoint(codePointer, "Jump to word address : " + address);
                     if (address > -2) {
                         codePointer = address;
                     }
                     break;
 
                 case StringPointer:
-                    logger.trace("Emit string");
-                    Common.emitString(settings.getStringLibrary().get(command.getStringKey()));
+                    String toEmit = settings.getStringLibrary().get(command.getStringKey());
+                    tracePoint(codePointer, "Emit string [" + toEmit + "]");
+                    Common.emitString(toEmit);
                     break;
 
                 case OpCode:
@@ -171,7 +186,7 @@ public class Interpreter {
                         case toInterpretMode:
                             if (runMode == RunningMode.compile) {
                                 if (logger.isTraceEnabled()) {
-                                    logger.trace("End of Word \n");
+                                    tracePoint(codePointer, "End of Word \n");
                                 }
                                 settings.getDictionary().addWord(compileWord.getAsWordListing());
                             }
@@ -447,33 +462,37 @@ public class Interpreter {
             case equalAB:
             case lessAB:
             case greaterAB:
+            case andAB:
+            case orAB:
                 logic(code);
                 break;
 
             case printA:
+                logger.trace("emit number [" + registerA + "]");
                 Common.emitNumber(registerA);
                 break;
 
             case printB:
+                logger.trace("emit number [" + registerB + "]");
                 Common.emitNumber(registerB);
                 break;
 
             case emitA:
+                logger.trace("emit Character [" + registerA + "]");
                 Common.emitChar((int) registerA);
                 break;
 
             case emitB:
+                logger.trace("emit Character [" + registerB + "]");
                 Common.emitChar((int) registerB);
                 break;
 
             case processComment:
                 readToCharacter(characterStream, ')');
-                logger.trace("processComment");
                 break;
 
             case processComment2:
                 readToCharacter(characterStream, '\n');
-                logger.trace("processComment2");
                 break;
 
             case processString:
@@ -498,12 +517,22 @@ public class Interpreter {
                 }
                 break;
 
+            case delay:
+                logger.trace("Delay program for [" + registerA + "] Milliseconds");
+                // block the current thread for registerA duration in Milliseconds
+                try {
+                    TimeUnit.MILLISECONDS.sleep(registerA);
+                } catch (InterruptedException e) {
+                    logger.warn(registerA + " Millisecond sleep interrupted: " + e.getMessage(), e);
+                }
+                break;
+
             case makeImmediate:
                 settings.getDictionary().makeLastWordImmediate();
                 logger.trace("Make last word immediate");
                 break;
 
-            case step:
+            case step:      // Take a step using legs. TBD
                 break;
 
             case distance:
@@ -554,6 +583,22 @@ public class Interpreter {
             case greaterAB:     // Is reg A greater than Reg B
                 logger.trace("Greater RegA & RegB : " + registerA + " > " + registerB);
                 if (registerA > registerB)
+                    registerA = 1;
+                else
+                    registerA = 0;
+                break;
+
+            case andAB:     // Is reg A and Reg B true
+                logger.trace("And RegA & RegB : " + registerA + " && " + registerB);
+                if (registerA != 0 && registerB != 0)
+                    registerA = 1;
+                else
+                    registerA = 0;
+                break;
+
+            case orAB:     // Is reg A or Reg B true
+                logger.trace("Or RegA & RegB : " + registerA + " || " + registerB);
+                if (registerA != 0 || registerB != 0)
                     registerA = 1;
                 else
                     registerA = 0;

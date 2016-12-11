@@ -15,6 +15,7 @@ public enum OpCode {
     thenJump,
     elseJump,
     dumpDictionary,
+    delay,              // (n -- )      Delays program for defined number of Milliseconds
     pushA,              // ( -- n)
     popA,               // (n -- )
     popRA,              // (r -- )
@@ -25,21 +26,23 @@ public enum OpCode {
     pushB,              // ( -- n)
     popB,               // (n -- )
     pushRB,             // (n -- r)
-    incB,
-    decB,
+    incB,               // (n -- n)
+    decB,               // (n -- n)
     jumpEqAB,
     jumpANEq0,
     addAB,
     subAB,
     mulAB,
     divAB,
-    equalAB,
-    lessAB,
-    greaterAB,
+    equalAB,            // (n n -- )
+    lessAB,             // (n n -- )
+    greaterAB,          // (n n -- )
+    andAB,              // (n n -- )
+    orAB,               // (n n -- )
     printB,
     printA,
-    emitA,
-    emitB,
+    emitA,              // (n -- )
+    emitB,              // (n -- )
     addressR,
     pushAddressR,
     doStart,

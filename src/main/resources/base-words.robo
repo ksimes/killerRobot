@@ -45,6 +45,8 @@
 : 0= |popA 0 |popB |equalAB |pushA ;
 : 0< |popA 0 |popB |lessAB |pushA ;
 : 0> |popA 0 |popB |greaterAB |pushA ;
+: AND |popA |popB |andAB |pushA ;
+: OR |popA |popB |orAB |pushA ;
 : INVERT 0= If 1 else 0 then ;
 
 ( display )
@@ -77,4 +79,5 @@
 : DISTANCE |popA |distance ;    ( return distance to any obstacle by a given UltraSonic sensor  n - n )
 : PICTURE |picture ;            ( take a single picture with on board camera )
 : VIDEO ;                       ( param seconds - take a video with on board camera )
+: DELAY |popA |delay ;          ( Pause the main thread for a given number of Milliseconds)
 

@@ -10,7 +10,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by S.King on 21/05/2016.
  * Updated by S.King on 23/10/2016 to include option to modify the port baudrate speed.
  */
-public class SerialComms {
+class SerialComms {
     /**
      * The <code>Logger</code> to be used.
      */
@@ -24,7 +24,7 @@ public class SerialComms {
     private String message;
     private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<>(20);
 
-    public SerialComms(String port, int speed) throws InterruptedException {
+    SerialComms(String port, int speed) throws InterruptedException {
 
         this.speed = speed;
         comPort = port;
@@ -49,12 +49,12 @@ public class SerialComms {
     }
 
 
-    public SerialComms(String port) throws InterruptedException {
+    SerialComms(String port) throws InterruptedException {
         this(port, DEFAULT_SPEED);
     }
 
 
-    public ArrayBlockingQueue<String> messages() {
+    ArrayBlockingQueue<String> messages() {
         return messages;
     }
 
@@ -62,7 +62,7 @@ public class SerialComms {
         serial.write(message);
     }
 
-    public void startComms() {
+    void startComms() {
         try {
             // open the default serial port provided on the GPIO header
             serial.open(comPort, speed);
@@ -71,7 +71,7 @@ public class SerialComms {
         }
     }
 
-    public void endComms() {
+    void endComms() {
         try {
             // open the default serial port provided on the GPIO header
             serial.close();
