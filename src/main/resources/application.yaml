@@ -1,0 +1,12 @@
+logging:
+  file:
+    name: output.log
+    path: .
+
+  pattern:
+    console: %d [%t] %-5p %c - %m%n
+    file: %d [%t] %-5p %c - %m%n
+
+  level:
+    root: WARN
+    com.stronans: TRACE

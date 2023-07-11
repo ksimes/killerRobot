@@ -27,13 +27,13 @@ public class RobotStartup {
      * @throws RuntimeException
      */
     private static void initLogging() throws RuntimeException {
-        try {
-            Properties properties = new Properties();
-            properties.load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
-//            PropertyConfigurator.configure(properties);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load logging properties for System");
-        }
+//        try {
+//            Properties properties = new Properties();
+//            properties.load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
+//            System.getProperties().load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
+//        } catch (Exception e) {
+//            throw new RuntimeException("Unable to load logging properties for System");
+//        }
     }
 
     public static void main(String[] args) {
@@ -50,8 +50,8 @@ public class RobotStartup {
 
     private static final class ProcessGoals {
         private final Settings settings = new Settings();
-        private final Sensors sensors;
-        private final MotorController motorController;
+//        private final Sensors sensors;
+//        private final MotorController motorController;
         private final String[] programArgs;
 
         ProcessGoals(String[] args) {
@@ -62,15 +62,15 @@ public class RobotStartup {
 
             // Startup all the threads which will handle:
             //   sight (Ultrasonic detectors)
-            log.info("Starting Sensor processing");
-            sensors = new Sensors(TESTING);
-            Thread sensorsThread = new Thread(sensors, "Sensors");
-            sensorsThread.start();
-            //   movement (wheels and later legs)
-            log.info("Starting Motor Controller processing");
-            motorController = new MotorController(TESTING);
-            Thread motorControl = new Thread(motorController, "Motors");
-            motorControl.start();
+//            log.info("Starting Sensor processing");
+//            sensors = new Sensors(TESTING);
+//            Thread sensorsThread = new Thread(sensors, "Sensors");
+//            sensorsThread.start();
+//            //   movement (wheels and later legs)
+//            log.info("Starting Motor Controller processing");
+//            motorController = new MotorController(TESTING);
+//            Thread motorControl = new Thread(motorController, "Motors");
+//            motorControl.start();
             //   temperature and humidity checks
             //   wifi transmission and reception (updates of goals and reports to central data server)
             //   Camera
@@ -83,7 +83,7 @@ public class RobotStartup {
         }
 
         void shutdown() {
-            sensors.shutdown();
+//            sensors.shutdown();
 //            motorController.shutdown();
         }
 
@@ -127,7 +127,7 @@ public class RobotStartup {
                 if (argument.startsWith("-f")) {
                     switch (argument) {
                         case "-f", "-file" -> {
-                            if (i < programArgs.length) {
+                            if (i + 1 < programArgs.length) {
                                 ProcessFile pf = new ProcessFile(programArgs[++i], settings);
                                 pf.process();
                             } else {
