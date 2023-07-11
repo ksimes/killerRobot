@@ -2,9 +2,10 @@ package com.stronans.robot.fileprocessing;
 
 import com.stronans.robot.Settings;
 import com.stronans.robot.core.Common;
-import com.stronans.robot.interpreter.Interpreter;
+import com.stronans.robot.engine.Interpreter;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * loads and processes a 'Robo' file contain FORTH like commands.
@@ -13,7 +14,7 @@ import java.io.*;
 public class ProcessFile {
     private String fileName = null;
     private InputStream inputStream = null;
-    private Settings settings = null;
+    private Settings settings;
 
     private ProcessFile(Settings settings) {
         this.settings = settings;
@@ -35,7 +36,7 @@ public class ProcessFile {
         try {
             if (fileName != null) {
                 File file = new File(fileName);
-                characterStream = new BufferedInputStream(new FileInputStream(file));
+                characterStream = new BufferedInputStream(Files.newInputStream(file.toPath()));
             } else {
                 characterStream = new BufferedInputStream(this.inputStream);
             }

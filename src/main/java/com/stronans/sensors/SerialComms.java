@@ -1,7 +1,7 @@
 package com.stronans.sensors;
 
 import com.pi4j.io.serial.*;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -10,19 +10,18 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by S.King on 21/05/2016.
  * Updated by S.King on 23/10/2016 to include option to modify the port baudrate speed.
  */
+@Slf4j
 class SerialComms {
     /**
      * The <code>Logger</code> to be used.
      */
-    private static Logger log = Logger.getLogger(SerialComms.class);
-
     private static final int DEFAULT_SPEED = 115200;
     private String comPort = Serial.DEFAULT_COM_PORT;
-    private int speed;
+    private final int speed;
 
     private final Serial serial;
     private String message;
-    private ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<>(20);
+    private final ArrayBlockingQueue<String> messages = new ArrayBlockingQueue<>(20);
 
     SerialComms(String port, int speed) throws InterruptedException {
 

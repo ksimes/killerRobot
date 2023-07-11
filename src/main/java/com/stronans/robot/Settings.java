@@ -8,8 +8,8 @@ import com.stronans.robot.core.StringLibrary;
  * Created by S.King on 07/02/2015.
  */
 public class Settings {
-    private Dictionary dictionary = new Dictionary();
-    private StringLibrary stringLibrary = new StringLibrary();
+    private final Dictionary dictionary = new Dictionary();
+    private final StringLibrary stringLibrary = new StringLibrary();
     private boolean verbose = false;
 
     public boolean isVerbose() {

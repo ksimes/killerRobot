@@ -98,7 +98,7 @@ void loop() {
 
   Serial.println(postData);
 
-  //Delay 1 second before next reading.
-  delay(1000);
+  //Delay 1/10 of a second before next reading.
+  delay(100);
 }
 

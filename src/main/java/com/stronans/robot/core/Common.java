@@ -1,21 +1,21 @@
 package com.stronans.robot.core;
 
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
 /**
  * Routines used all over the projects.
- * <p>
+ * <p/>
  * Created by S.King on 08/02/2015.
  */
+
+@Slf4j
 public class Common {
     /**
      * The <code>Logger</code> to be used.
      */
-    private static Logger log = Logger.getLogger(Common.class);
-
 
     public static String processString(BufferedInputStream fis, char delimiter) throws IOException {
         String buffer = "";
@@ -86,7 +86,7 @@ public class Common {
     }
 
     public static void output(char character) {
-        log.debug(character);
+        log.debug("{}", character);
         System.out.print(character);
     }
 }

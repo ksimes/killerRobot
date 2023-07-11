@@ -5,7 +5,7 @@
 2 CONSTANT CENTER-ULTRA
 3 CONSTANT RIGHT-ULTRA
 
-10 Constant MinDistance     \ 15 cm minimum distance
+15 Constant MinDistance     \ 15 cm minimum distance
 
 ( Sensor value storage )
 Variable LeftSensor
@@ -17,8 +17,8 @@ Variable RightSensor
   0 CenterSensor !
   0 RightSensor !
 
-  ( Wait 5 seconds to ensure that the Ultrasonic sensors have returned values )
-  5 delay
+  ( Wait 5 seconds to ensure that the Ultrasonic sensors have returned values before we start )
+  5000 delay
 
   10 0 Do
     ( Read the ultrasonic sensor values, if not -1 then store otherwise use last value )
@@ -43,7 +43,7 @@ Variable RightSensor
         then
     then
 
-    1 pause     \ Pause a second and do it again
+\\    100 delay     \ Pause the program for a second and do it again
   loop
 
   stop

@@ -1,9 +1,9 @@
 package com.stronans.sensors;
 
 import com.fasterxml.jackson.annotation.*;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Generated;
+// import javax.annotation.Generated;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +23,9 @@ import java.util.Map;
  * }
  */
 
+@Slf4j
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Generated("org.jsonschema2pojo")
+// @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
         "left",
         "centre",
@@ -34,8 +35,6 @@ public final class Distance {
     /**
      * The <code>Logger</code> to be used.
      */
-    private static Logger log = Logger.getLogger(Distance.class);
-
     @JsonProperty("left")
     private Long left;
     @JsonProperty("centre")
@@ -43,7 +42,7 @@ public final class Distance {
     @JsonProperty("right")
     private Long right;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<>();
 
     /**
      * No args constructor for use in serialization

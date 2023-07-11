@@ -2,11 +2,11 @@ package com.stronans.robot.core;
 
 /**
  * Simple POJO for holding a memory entry
- *
+ * <p/>
  * Created by S.King on 07/02/2015.
  */
 public final class MemoryEntry {
-    private MemoryType type;
+    private final MemoryType type;
     private OpCode operation;
     private long number;
     private Word word;

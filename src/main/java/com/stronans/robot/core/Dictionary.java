@@ -8,13 +8,10 @@ import java.util.*;
  */
 public final class Dictionary {
 
-    private Map<String, Word> listing = new HashMap<>(200);
+    private final Map<String, Word> listing = new HashMap<>(200);
     private Word lastWordAdded = null;
 
     public Dictionary() {
-        // Initialise the dictionary
-        listing.clear();
-
         List<MemoryEntry> compiledCode = new ArrayList<>();
 
         // Add in the default words to the dictionary

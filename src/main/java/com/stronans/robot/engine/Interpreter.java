@@ -1,13 +1,13 @@
-package com.stronans.robot.interpreter;
+package com.stronans.robot.engine;
 
 import com.stronans.robot.Settings;
 import com.stronans.robot.core.*;
 import com.stronans.robot.fileprocessing.ProcessFile;
-import com.stronans.robot.interpreter.exceptions.QuitException;
-import com.stronans.robot.interpreter.exceptions.StackEmptyException;
-import com.stronans.robot.interpreter.exceptions.UnrecognisedTokenException;
+import com.stronans.robot.engine.exceptions.QuitException;
+import com.stronans.robot.engine.exceptions.StackEmptyException;
+import com.stronans.robot.engine.exceptions.UnrecognisedTokenException;
 import com.stronans.sensors.Sensors;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -20,18 +20,17 @@ import static com.stronans.robot.core.OpCode.quitOut;
  * Handles the processing of Tokens in the input stream to produce actions.
  * Created by S.King on 07/02/2015.
  */
+@Slf4j
 public class Interpreter {
-    private static final Logger logger = Logger.getLogger(Compiler.class);
-
-    private BufferedInputStream characterStream;
-    private CoreStack dataStack = new CoreStack();
-    private CoreStack returnStack = new CoreStack();
+    private final BufferedInputStream characterStream;
+    private final CoreStack dataStack = new CoreStack();
+    private final CoreStack returnStack = new CoreStack();
     private long registerA, registerB;
-    private Settings settings;
-    private Compiler compileWord = new Compiler();
+    private final Settings settings;
+    private final Compiler compileWord = new Compiler();
     private RunningMode runMode = RunningMode.interpret;
-    private Token token;
-    private SpecialOpcodes specialOpCodes = new SpecialOpcodes();
+    private final Token token;
+    private final OutputOpcodes outputOpcodes = new OutputOpcodes();
     private Word lastWord = null;
 
     public Interpreter(Settings settings, BufferedInputStream characterStream) {
@@ -55,8 +54,8 @@ public class Interpreter {
                     }
 
                     if ((runMode == RunningMode.interpret) || word.isImmediate()) {
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Executing Word : [" + token.asText() + "]");
+                        if (log.isTraceEnabled()) {
+                            log.trace("Executing Word : [" + token.asText() + "]");
                         }
 
                         runMode = execute(word, runMode);
@@ -73,8 +72,8 @@ public class Interpreter {
                         }
 
                         if (runMode == RunningMode.interpret) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("Pushing number : [" + token.asText() + "]");
+                            if (log.isTraceEnabled()) {
+                                log.trace("Pushing number : [" + token.asText() + "]");
                             }
 
                             dataStack.push(aNumber.get());
@@ -91,8 +90,8 @@ public class Interpreter {
                                 throw new UnrecognisedTokenException(token.asText());
                             }
                         } else {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("Word not found : [" + token.asText() + "] - token");
+                            if (log.isTraceEnabled()) {
+                                log.trace("Word not found : [" + token.asText() + "] - token");
                             }
                             Common.outputln(token.asText() + " ?");
                         }
@@ -144,7 +143,7 @@ public class Interpreter {
 
     private void tracePoint(int codePointer, String data)
     {
-        logger.trace("CP " + codePointer + " : " + data);
+        log.trace("CP " + codePointer + " : " + data);
     }
 
     private RunningMode execute(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
@@ -154,55 +153,55 @@ public class Interpreter {
             MemoryEntry command = word.getCode().get(codePointer);
 
             switch (command.getType()) {
-                case Word:
+                case Word -> {
                     Word exe = command.getWord();
                     tracePoint(codePointer, "Execute Word : " + exe.getName());
                     runMode = execute(exe, runMode);
                     lastWord = exe;
-                    break;
+                }
 
-                case Number:
+                case Number -> {
                     long number = command.getNumber();
                     tracePoint(codePointer, "Push number : " + number);
                     dataStack.push(number);
-                    break;
+                }
 
-                case Address:
+                case Address -> {
                     int address = command.getAddress();
                     tracePoint(codePointer, "Jump to word address : " + address);
                     if (address > -2) {
                         codePointer = address;
                     }
-                    break;
+                }
 
-                case StringPointer:
+                case StringPointer -> {
                     String toEmit = settings.getStringLibrary().get(command.getStringKey());
                     tracePoint(codePointer, "Emit string [" + toEmit + "]");
                     Common.emitString(toEmit);
-                    break;
+                }
 
-                case OpCode:
+                case OpCode -> {
                     switch (command.getOperation()) {
-                        case toInterpretMode:
+                        case toInterpretMode -> {
                             if (runMode == RunningMode.compile) {
-                                if (logger.isTraceEnabled()) {
+                                if (log.isTraceEnabled()) {
                                     tracePoint(codePointer, "End of Word \n");
                                 }
                                 settings.getDictionary().addWord(compileWord.getAsWordListing());
                             }
                             runMode = RunningMode.interpret;
-                            break;
+                        }
 
-                        case toCompileMode:
+                        case toCompileMode -> {
                             if (runMode == RunningMode.interpret) {
                                 // Get the next token and this is the new word.
                                 token.getToken();
                                 compileWord.startWord(token.asText());
                             }
                             runMode = RunningMode.compile;
-                            break;
+                        }
 
-                        case ifTest:
+                        case ifTest -> {
                             // Does nothing in interpret mode.
                             if (runMode == RunningMode.compile) {
                                 // If there is a non-zero values on TOS then move past the THEN address
@@ -212,17 +211,17 @@ public class Interpreter {
                                 compileWord.addAddress(-1);
                                 returnStack.push(compileWord.getCodePointer());  // addressR
                             }
-                            break;
+                        }
 
-                        case thenJump:
+                        case thenJump -> {
                             // Does nothing in interpret mode.
                             if (runMode == RunningMode.compile) {
                                 long jumpPointer = returnStack.pop();
                                 compileWord.pokeAddress(jumpPointer, compileWord.getCodePointer());
                             }
-                            break;
+                        }
 
-                        case elseJump:
+                        case elseJump -> {
                             // Does nothing in interpret mode.
                             if (runMode == RunningMode.compile) {
                                 long jumpPointer = returnStack.pop();
@@ -230,20 +229,21 @@ public class Interpreter {
                                 returnStack.push(compileWord.getCodePointer());
                                 compileWord.pokeAddress(jumpPointer, compileWord.getCodePointer());
                             }
-                            break;
+                        }
 
-                        case doStart:           // Start of a do loop, pushes top two data stack onto return stack + address
+                        case doStart -> {           // Start of a do loop, pushes top two data stack onto return stack + address
                             switch (runMode) {
-                                case interpret:
+                                case interpret -> {
                                     registerA = dataStack.pop();        // popA
                                     registerB = dataStack.pop();        // popB
+
                                     // Note that we decrement the delimiter value here by one as the loop test is
                                     // at the end of the loop and not the start
                                     returnStack.push(--registerB);      // decB, pushRB
                                     returnStack.push(registerA);        // pushRA
-                                    break;
+                                }
 
-                                case compile:
+                                case compile -> {
 //                                    compileWord.addOpCode(OpCode.popA);
 //                                    compileWord.addOpCode(OpCode.popB);
 //                                    compileWord.addOpCode(OpCode.decB);
@@ -251,16 +251,15 @@ public class Interpreter {
 //                                    compileWord.addOpCode(OpCode.pushRA);
                                     compileWord.addOpCode(OpCode.doStart);
                                     returnStack.push(compileWord.getCodePointer());
-                                    break;
+                                }
                             }
-                            break;
+                        }
 
-                        case loop:
+                        case loop -> {
                             switch (runMode) {
-                                case interpret:
+                                case interpret -> {
                                     registerA = returnStack.pop();      // popA
                                     registerB = returnStack.pop();      // popB
-
                                     if (registerA == registerB) {       // jumpEqAB
                                         codePointer++;
                                     } else {
@@ -268,21 +267,19 @@ public class Interpreter {
                                         returnStack.push(registerB);    // pushRB
                                         returnStack.push(registerA);    // pushRA
                                     }
-                                    break;
-
-                                case compile:
+                                }
+                                case compile -> {
                                     compileWord.addOpCode(OpCode.loop);
                                     compileWord.addAddress(returnStack.pop());
-                                    break;
+                                }
                             }
-                            break;
+                        }
 
-                        case plusLoop:
+                        case plusLoop -> {
                             switch (runMode) {
-                                case interpret:
+                                case interpret -> {
                                     registerA = returnStack.pop();      // popA
                                     registerB = returnStack.pop();      // popB
-
                                     if (registerA == registerB) {       // jumpEqAB
                                         codePointer++;
                                     } else {
@@ -293,23 +290,23 @@ public class Interpreter {
 
                                         returnStack.push(registerA);    // pushRA
                                     }
-                                    break;
+                                }
 
-                                case compile:
+                                case compile -> {
                                     compileWord.addOpCode(OpCode.plusLoop);
                                     compileWord.addAddress(returnStack.pop());
-                                    break;
+                                }
                             }
-                            break;
+                        }
 
-                        case begin:
+                        case begin -> {
                             // Does nothing in interpret mode.
                             if (runMode == RunningMode.compile) {
                                 returnStack.push(compileWord.getCodePointer());
                             }
-                            break;
+                        }
 
-                        case again:
+                        case again -> {
                             switch (runMode) {
                                 case interpret:
                                     break;
@@ -318,47 +315,40 @@ public class Interpreter {
                                     compileWord.addAddress(returnStack.pop());
                                     break;
                             }
-                            break;
+                        }
 
-
-                        case quit:
+                        case quit -> {
                             switch (runMode) {
-                                case interpret:
-                                    throw new QuitException();
-
-                                case compile:
-                                    compileWord.addOpCode(OpCode.quit);
-                                    break;
+                                case interpret -> throw new QuitException();
+                                case compile -> compileWord.addOpCode(OpCode.quit);
                             }
-                            break;
+                        }
 
-                        case jumpEqAB:     // If register A == B then skip next memory location
+                        case jumpEqAB -> {     // If register A == B then skip next memory location
                             if (registerA == registerB) {
                                 codePointer++;
                             }
-                            break;
+                        }
 
                         // Jump if A Not Equal to zero
-                        case jumpANEq0:     // If register A != 0 then skip next memory location
+                        case jumpANEq0 -> {     // If register A != 0 then skip next memory location
                             if (registerA != 0) {
                                 codePointer++;
                             }
-                            break;
+                        }
 
-                        case buildVariable:
+                        case buildVariable -> {
                             // Get the next token and this is the new variable word.
                             token.getToken();
                             compileWord.startWord(token.asText());
                             compileWord.addOpCode(quitOut);
                             compileWord.addNumber(0L);
                             settings.getDictionary().addWord(compileWord.getAsWordListing());
-                            break;
+                        }
 
-                        case quitOut:
-                            codePointer = word.getCode().size();
-                            break;
+                        case quitOut -> codePointer = word.getCode().size();
 
-                        case storeVariable:
+                        case storeVariable -> {
                             if (lastWord != null) {
                                 MemoryEntry entry = lastWord.getCode().get(0);
                                 if (entry.getType() == MemoryType.OpCode && entry.getOperation() == quitOut) {
@@ -366,9 +356,9 @@ public class Interpreter {
                                     lastWord.getCode().set(1, me);
                                 }
                             }
-                            break;
+                        }
 
-                        case fetchVariable:
+                        case fetchVariable -> {
                             if (lastWord != null) {
                                 MemoryEntry entry = lastWord.getCode().get(0);
                                 if (entry.getType() == MemoryType.OpCode && entry.getOperation() == quitOut) {
@@ -376,20 +366,19 @@ public class Interpreter {
                                     dataStack.push(entry.getNumber());
                                 }
                             }
-                            break;
+                        }
 
-                        case buildConstant:
+                        case buildConstant -> {
                             // Get the next token and this is the new variable word.
                             token.getToken();
                             compileWord.startWord(token.asText());
                             compileWord.addNumber(registerA);
                             settings.getDictionary().addWord(compileWord.getAsWordListing());
-                            break;
+                        }
 
-                        default:
-                            executeOperation(command.getOperation());
+                        default -> executeOperation(command.getOperation());
                     }
-                    break;
+                }
             }
         }
 
@@ -400,90 +389,86 @@ public class Interpreter {
         switch (code) {
             case pushA:     // Push contexts of A register to stack
                 dataStack.push(registerA);
-                logger.trace("Push to data stack registerA: " + registerA);
+                log.trace("Push to data stack registerA: " + registerA);
                 break;
 
             case pushB:     // Push contents of B register to stack
                 dataStack.push(registerB);
-                logger.trace("Push to data stack registerB: " + registerB);
+                log.trace("Push to data stack registerB: " + registerB);
                 break;
 
             case popA:      // Pop contexts of top of stack to reg A
                 registerA = dataStack.pop();
-                logger.trace("Pop to registerA: " + registerA);
+                log.trace("Pop to registerA: " + registerA);
                 break;
 
             case popB:      // Pop contexts of top of stack to reg B
                 registerB = dataStack.pop();
-                logger.trace("Pop to registerB: " + registerB);
+                log.trace("Pop to registerB: " + registerB);
                 break;
 
             case incA:
                 registerA++;
-                logger.trace("increment registerA to: " + registerA);
+                log.trace("increment registerA to: " + registerA);
                 break;
 
             case decA:
                 registerA--;
-                logger.trace("decrement registerA to: " + registerA);
+                log.trace("decrement registerA to: " + registerA);
                 break;
 
             case incB:
                 registerB++;
-                logger.trace("increment registerB to: " + registerB);
+                log.trace("increment registerB to: " + registerB);
                 break;
 
             case decB:
                 registerB--;
-                logger.trace("decrement registerB to: " + registerB);
+                log.trace("decrement registerB to: " + registerB);
                 break;
 
             case addAB:
                 registerA += registerB;
-                logger.trace("Add registerB to registerA: " + registerA);
+                log.trace("Add registerB to registerA: " + registerA);
                 break;
 
             case subAB:
                 registerA -= registerB;
-                logger.trace("Subtract registerB from registerA: " + registerA);
+                log.trace("Subtract registerB from registerA: " + registerA);
                 break;
 
             case mulAB:
                 registerA *= registerB;
-                logger.trace("Multiple registerB and registerA: " + registerA);
+                log.trace("Multiple registerB and registerA: " + registerA);
                 break;
 
             case divAB:
                 registerA /= registerB;
-                logger.trace("Divide registerA with registerB: " + registerA);
+                log.trace("Divide registerA with registerB: " + registerA);
                 break;
 
             // Logic grouping
-            case equalAB:
-            case lessAB:
-            case greaterAB:
-            case andAB:
-            case orAB:
+            case equalAB, lessAB, greaterAB, andAB, orAB:
                 logic(code);
                 break;
 
             case printA:
-                logger.trace("emit number [" + registerA + "]");
+                log.trace("emit number [" + registerA + "]");
                 Common.emitNumber(registerA);
                 break;
 
             case printB:
-                logger.trace("emit number [" + registerB + "]");
+                log.trace("emit number [" + registerB + "]");
                 Common.emitNumber(registerB);
                 break;
 
             case emitA:
-                logger.trace("emit Character [" + registerA + "]");
+                log.trace("emit Character [" + registerA + "]");
                 Common.emitChar((int) registerA);
                 break;
 
             case emitB:
-                logger.trace("emit Character [" + registerB + "]");
+                log.trace("emit Character [" + registerB + "]");
                 Common.emitChar((int) registerB);
                 break;
 
@@ -498,15 +483,13 @@ public class Interpreter {
             case processString:
                 String data = Common.processString(characterStream, '"');
                 switch (runMode) {
-                    case interpret:
-                        Common.emitString(data);
-                        break;
+                    case interpret -> Common.emitString(data);
 
-                    case compile:
+                    case compile -> {
                         String stringKey = settings.getStringLibrary().add(data);
                         compileWord.addStringKey(stringKey);
-                        logger.trace("process String [" + data + "] compile to :" + stringKey);
-                        break;
+                        log.trace("process String [" + data + "] compile to :" + stringKey);
+                    }
                 }
                 break;
 
@@ -518,18 +501,18 @@ public class Interpreter {
                 break;
 
             case delay:
-                logger.trace("Delay program for [" + registerA + "] Milliseconds");
+                log.trace("Delay program for [" + registerA + "] Milliseconds");
                 // block the current thread for registerA duration in Milliseconds
                 try {
                     TimeUnit.MILLISECONDS.sleep(registerA);
                 } catch (InterruptedException e) {
-                    logger.warn(registerA + " Millisecond sleep interrupted: " + e.getMessage(), e);
+                    log.warn(registerA + " Millisecond sleep interrupted: " + e.getMessage(), e);
                 }
                 break;
 
             case makeImmediate:
                 settings.getDictionary().makeLastWordImmediate();
-                logger.trace("Make last word immediate");
+                log.trace("Make last word immediate");
                 break;
 
             case step:      // Take a step using legs. TBD
@@ -538,13 +521,13 @@ public class Interpreter {
             case distance:
                 long distance = Sensors.getSensorData(registerA);
                 dataStack.push(distance);
-                logger.trace("measure sensor [" + registerA + "] value = {" + distance + "}");
+                log.trace("measure sensor [" + registerA + "] value = {" + distance + "}");
                 break;
 
             case load:
                 readToCharacter(characterStream, '"');
                 String filename = Common.processString(characterStream, '"');
-                logger.trace("Load file : " + filename);
+                log.trace("Load file : " + filename);
                 ProcessFile pf = new ProcessFile(filename, settings);
                 pf.process();
                 break;
@@ -557,52 +540,52 @@ public class Interpreter {
                 break;
 
             default:
-                specialOpCodes.execute(code, registerA);
+                outputOpcodes.execute(code, registerA);
                 break;
         }
     }
 
     private void logic(OpCode code) {
         switch (code) {
-            case equalAB:       // Is reg A equal to Reg B
-                logger.trace("Equals RegA & RegB : " + registerA + " = " + registerB);
+            case equalAB -> {       // Is reg A equal to Reg B
+                log.trace("Equals RegA & RegB : " + registerA + " = " + registerB);
                 if (registerA == registerB)
                     registerA = 1;
                 else
                     registerA = 0;
-                break;
+            }
 
-            case lessAB:        // Is reg A less than Reg B
-                logger.trace("Less RegA & RegB : " + registerA + " < " + registerB);
+            case lessAB -> {        // Is reg A less than Reg B
+                log.trace("Less RegA & RegB : " + registerA + " < " + registerB);
                 if (registerA < registerB)
                     registerA = 1;
                 else
                     registerA = 0;
-                break;
+            }
 
-            case greaterAB:     // Is reg A greater than Reg B
-                logger.trace("Greater RegA & RegB : " + registerA + " > " + registerB);
+            case greaterAB -> {     // Is reg A greater than Reg B
+                log.trace("Greater RegA & RegB : " + registerA + " > " + registerB);
                 if (registerA > registerB)
                     registerA = 1;
                 else
                     registerA = 0;
-                break;
+            }
 
-            case andAB:     // Is reg A and Reg B true
-                logger.trace("And RegA & RegB : " + registerA + " && " + registerB);
+            case andAB -> {     // Is reg A and Reg B true
+                log.trace("And RegA & RegB : " + registerA + " && " + registerB);
                 if (registerA != 0 && registerB != 0)
                     registerA = 1;
                 else
                     registerA = 0;
-                break;
+            }
 
-            case orAB:     // Is reg A or Reg B true
-                logger.trace("Or RegA & RegB : " + registerA + " || " + registerB);
+            case orAB -> {     // Is reg A or Reg B true
+                log.trace("Or RegA & RegB : " + registerA + " || " + registerB);
                 if (registerA != 0 || registerB != 0)
                     registerA = 1;
                 else
                     registerA = 0;
-                break;
+            }
         }
     }
 }

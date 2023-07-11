@@ -5,13 +5,13 @@ import java.util.List;
 
 /**
  * Defines a FORTH word. The name is stored in Lower case but the dictionary search is case insensitive.
- *
+ * <p/>
  * Created by S.King on 07/02/2015.
  */
 public class Word {
     private boolean immediate;
-    private String name;
-    private List<MemoryEntry> compiledCode = new ArrayList<>();
+    private final String name;
+    private List<MemoryEntry> compiledCode;
 
     public Word(String name, List<MemoryEntry> code, Boolean immediate) {
         this.name = name.toLowerCase();

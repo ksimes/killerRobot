@@ -2,28 +2,37 @@ package com.stronans.sensors;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Processes and stores any sensor data picked up from serial comms.
  * Created by S.King on 22/10/2016.
  */
+@Slf4j
 public class Sensors implements Runnable {
     /**
      * The <code>Logger</code> to be used.
      */
-    private final static Logger log = Logger.getLogger(Sensors.class);
     private final static String SERIAL_PORT = "/dev/ttyUSB0";
     private boolean testing = false;
     private static SerialComms comms;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     private static SensorMessage lastReading = new SensorMessage(new Distance(-1L, -1L, -1L));
     private static boolean finished = false;
 
     public Sensors() {
+        Runtime.getRuntime().addShutdownHook(new Thread("Sensor shutdown") {
+                                                 @Override
+                                                 public void run() {
+                                                     shutdown();
+                                                     log.info("Sensor shutdown.");
+                                                 }
+                                             }
+        );
     }
 
     public Sensors(boolean testing) {
+        this();
         this.testing = testing;
         if (!testing) {
             try {
@@ -38,13 +47,13 @@ public class Sensors implements Runnable {
 
     private void processMessage(String rawMessage) {
         if (!testing) {
-            log.info("incomming msg : [" + rawMessage + "]");
+            log.debug("incomming msg : [" + rawMessage.trim() + "]");
 
             try {
                 synchronized (Sensors.class) {
                     lastReading = mapper.readValue(rawMessage, SensorMessage.class);
 
-                    log.info("Last Reading : " + lastReading);
+                    log.debug("Last Reading : " + lastReading);
                 }
 
             } catch (JsonParseException jpe) {
@@ -55,7 +64,7 @@ public class Sensors implements Runnable {
                 log.error(" ==>> EXCEPTION DESERIALISING JSON MESSAGE: " + e.getMessage());
             }
         } else {
-            Distance distance = new Distance(20L, 20L, 20L);
+            Distance distance = new Distance(10L, 10L, 10L);
             lastReading = new SensorMessage(distance);
         }
     }
@@ -88,6 +97,7 @@ public class Sensors implements Runnable {
         if (!testing) {
             comms.endComms();
         }
+        log.info("Sensor shutdown");
     }
 
     static public long getSensorData(long sensorID) {
@@ -96,17 +106,12 @@ public class Sensors implements Runnable {
 
         synchronized (Sensors.class) {
             switch (sensorToRead) {
-                case 1:     // Left side mounted ultrasonic sensor
-                    result = lastReading.getDistance().getLeft();
-                    break;
-
-                case 2:     // Center mounted ultrasonic sensor
-                    result = lastReading.getDistance().getCentre();
-                    break;
-
-                case 3:     // Right side mounted ultrasonic sensor
-                    result = lastReading.getDistance().getRight();
-                    break;
+                case 1 ->     // Left side mounted ultrasonic sensor
+                        result = lastReading.getDistance().getLeft();
+                case 2 ->     // Center mounted ultrasonic sensor
+                        result = lastReading.getDistance().getCentre();
+                case 3 ->     // Right side mounted ultrasonic sensor
+                        result = lastReading.getDistance().getRight();
             }
         }
 

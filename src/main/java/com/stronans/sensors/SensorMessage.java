@@ -2,12 +2,10 @@ package com.stronans.sensors;
 
 import com.fasterxml.jackson.annotation.*;
 
-import javax.annotation.Generated;
 import java.util.HashMap;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
         "Distance"
 })
@@ -16,7 +14,7 @@ public class SensorMessage {
     @JsonProperty("Distance")
     private Distance distance;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private final Map<String, Object> additionalProperties = new HashMap<>();
 
     /**
      * No args constructor for use in serialization
@@ -28,7 +26,7 @@ public class SensorMessage {
      * @param distance
      */
     @JsonCreator
-    public SensorMessage(@JsonProperty("Distance")Distance distance) {
+    public SensorMessage(@JsonProperty("Distance") Distance distance) {
         this.distance = distance;
     }
 

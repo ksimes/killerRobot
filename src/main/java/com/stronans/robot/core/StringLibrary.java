@@ -10,7 +10,7 @@ import java.util.Map;
 public class StringLibrary {
     // Allows for 2 billion keys
     private int indexKey = 0;
-    private Map<String, String>Strings = new HashMap<>(200);
+    private final Map<String, String>Strings = new HashMap<>(200);
 
     public String add(String data)
     {

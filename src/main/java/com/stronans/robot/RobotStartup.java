@@ -4,20 +4,20 @@ import com.stronans.motozero.motors.MotorController;
 import com.stronans.robot.core.Common;
 import com.stronans.robot.fileprocessing.ProcessFile;
 import com.stronans.sensors.Sensors;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Startup class for the Giant Killer Robot controller program.
  * <p/>
  * Created by S.King on 07/02/2015.
  */
+@Slf4j
 public class RobotStartup {
-    private static final Logger logger = Logger.getLogger(RobotStartup.class);
-
     private static boolean TESTING = false;
 
     /**
@@ -30,7 +30,7 @@ public class RobotStartup {
         try {
             Properties properties = new Properties();
             properties.load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
-            PropertyConfigurator.configure(properties);
+//            PropertyConfigurator.configure(properties);
         } catch (Exception e) {
             throw new RuntimeException("Unable to load logging properties for System");
         }
@@ -49,10 +49,10 @@ public class RobotStartup {
     }
 
     private static final class ProcessGoals {
-        private Settings settings = new Settings();
-        private Sensors sensors;
-        private MotorController motorController;
-        private String[] programArgs;
+        private final Settings settings = new Settings();
+        private final Sensors sensors;
+        private final MotorController motorController;
+        private final String[] programArgs;
 
         ProcessGoals(String[] args) {
 
@@ -60,14 +60,14 @@ public class RobotStartup {
             // See if there are any arguments which will affect the setting of controllers in this initialiser.
             processInitalArguments(args);
 
-            // Startup all of the threads which will handle:
+            // Startup all the threads which will handle:
             //   sight (Ultrasonic detectors)
-            logger.info("Starting Sensor processing");
+            log.info("Starting Sensor processing");
             sensors = new Sensors(TESTING);
             Thread sensorsThread = new Thread(sensors, "Sensors");
             sensorsThread.start();
             //   movement (wheels and later legs)
-            logger.info("Starting Motor Controller processing");
+            log.info("Starting Motor Controller processing");
             motorController = new MotorController(TESTING);
             Thread motorControl = new Thread(motorController, "Motors");
             motorControl.start();
@@ -89,31 +89,28 @@ public class RobotStartup {
 
         void processInitalArguments(String[] args) {
 
-            logger.info("Program startup");
+            log.info("Program startup");
 
             for (String argument : args) {
-                logger.trace("program arguments : [" + argument + "]");
+                log.trace("program arguments : [" + argument + "]");
 
                 if (argument.startsWith("-")) {
                     switch (argument) {
-                        case "-v":
-                        case "-verbose":
+                        case "-v", "-verbose":
                             settings.setVerbose(true);
                             break;
 
-                        case "-t":
-                        case "-test":
+                        case "-t", "-test":
                             TESTING = true;
                             break;
 
-                        case "-f":
-                        case "-file":
+                        case "-f",  "-file":
                             // Do nothing. Handled in the next routine in chain.
                             break;
 
                         default:
                             String msg = "Unrecognised argument : [" + argument + "]";
-                            logger.error(msg);
+                            log.error(msg);
                             Common.outputln(msg);
                             break;
                     }
@@ -129,25 +126,39 @@ public class RobotStartup {
                 String argument = programArgs[i];
                 if (argument.startsWith("-f")) {
                     switch (argument) {
-                        case "-f":
-                        case "-file":
+                        case "-f", "-file" -> {
                             if (i < programArgs.length) {
                                 ProcessFile pf = new ProcessFile(programArgs[++i], settings);
                                 pf.process();
                             } else {
                                 String msg = "-file requires a filename";
-                                logger.error(msg);
+                                log.error(msg);
                                 Common.outputln(msg);
                             }
-                            break;
+                        }
                     }
                 }
             }
 
             Common.outputln();
-            logger.info("Program complete");
+            log.info("Program complete");
             Common.outputln("ok");
             shutdown();
+
+            // block the current thread for registerA duration in Milliseconds
+            try {
+                TimeUnit.MILLISECONDS.sleep(5000);
+            } catch (InterruptedException e) {
+                log.warn("5000 Millisecond sleep interrupted: " + e.getMessage(), e);
+            }
+
+            log.info("Thread list");
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+
+            for(Thread t : threadArray) {
+                log.info("Thread name : " + t.getName());
+            }
         }
     }
 }

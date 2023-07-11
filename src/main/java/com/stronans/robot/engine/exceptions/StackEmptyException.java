@@ -1,4 +1,6 @@
-package com.stronans.robot.interpreter.exceptions;
+package com.stronans.robot.engine.exceptions;
+
+import java.io.Serial;
 
 /**
  *
@@ -6,7 +8,8 @@ package com.stronans.robot.interpreter.exceptions;
  */
 public class StackEmptyException extends ArrayIndexOutOfBoundsException {
 
-    private static final long serialVersionUID = 01L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public StackEmptyException() {
         super("Stack Empty");
