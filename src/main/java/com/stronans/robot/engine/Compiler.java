@@ -1,9 +1,6 @@
 package com.stronans.robot.engine;
 
-import com.stronans.robot.core.MemoryEntry;
-import com.stronans.robot.core.OpCode;
-import com.stronans.robot.core.RunningMode;
-import com.stronans.robot.core.Word;
+import com.stronans.robot.core.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;

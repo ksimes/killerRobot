@@ -50,7 +50,7 @@ public class Interpreter {
                     Word word = aWord.get();
 
                     if (settings.isVerbose()) {
-                        Common.outputln("Have word : [" + token.asText() + "]");
+                        Common.outputln("Word: [" + token.asText() + "]");
                     }
 
                     if ((runMode == RunningMode.interpret) || word.isImmediate()) {
@@ -58,6 +58,9 @@ public class Interpreter {
                             log.trace("Executing Word : [" + token.asText() + "]");
                         }
 
+                        if (settings.isVerbose()) {
+                            Common.outputln("Executing: [" + token.asText() + "]");
+                        }
                         runMode = execute(word, runMode);
                     } else {
                         compileWord.addWord(word);
@@ -85,6 +88,14 @@ public class Interpreter {
                         if (runMode == RunningMode.compile) {
                             Optional<OpCode> opCode = token.asOpCode();
                             if (opCode.isPresent()) {
+                                if (settings.isVerbose()) {
+                                    Common.outputln("Have opcode : [" + opCode.get() + "]");
+                                }
+
+                                if (log.isTraceEnabled()) {
+                                    log.trace("compiling opcode : [" + opCode.get() + "]");
+                                }
+
                                 compileWord.addOpCode(opCode.get());
                             } else {
                                 throw new UnrecognisedTokenException(token.asText());
@@ -144,6 +155,9 @@ public class Interpreter {
     private void tracePoint(int codePointer, String data)
     {
         log.trace("CP " + codePointer + " : " + data);
+        if (settings.isVerbose()) {
+            Common.outputln("CodePoint " + codePointer + " : " + data);
+        }
     }
 
     private RunningMode execute(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
@@ -154,10 +168,10 @@ public class Interpreter {
 
             switch (command.getType()) {
                 case Word -> {
-                    Word exe = command.getWord();
-                    tracePoint(codePointer, "Execute Word : " + exe.getName());
-                    runMode = execute(exe, runMode);
-                    lastWord = exe;
+                    Word wordExecuting = command.getWord();
+                    tracePoint(codePointer, "Executing Word : " + wordExecuting.getName());
+                    runMode = execute(wordExecuting, runMode);
+                    lastWord = wordExecuting;
                 }
 
                 case Number -> {
@@ -196,9 +210,15 @@ public class Interpreter {
                             if (runMode == RunningMode.interpret) {
                                 // Get the next token and this is the new word.
                                 token.getToken();
+                                if (settings.isVerbose()) {
+                                    Common.outputln("Compiling word: [" + token.asText() + "]");
+                                }
                                 compileWord.startWord(token.asText());
                             }
                             runMode = RunningMode.compile;
+                            if (settings.isVerbose()) {
+                                Common.outputln("Run mode switch to compile");
+                            }
                         }
 
                         case ifTest -> {
@@ -341,6 +361,9 @@ public class Interpreter {
                             // Get the next token and this is the new variable word.
                             token.getToken();
                             compileWord.startWord(token.asText());
+                            if (settings.isVerbose()) {
+                                Common.outputln("Build variable: [" + token.asText() + "]");
+                            }
                             compileWord.addOpCode(quitOut);
                             compileWord.addNumber(0L);
                             settings.getDictionary().addWord(compileWord.getAsWordListing());
@@ -372,6 +395,9 @@ public class Interpreter {
                             // Get the next token and this is the new variable word.
                             token.getToken();
                             compileWord.startWord(token.asText());
+                            if (settings.isVerbose()) {
+                                Common.outputln("Build Constant: [" + token.asText() + "]");
+                            }
                             compileWord.addNumber(registerA);
                             settings.getDictionary().addWord(compileWord.getAsWordListing());
                         }

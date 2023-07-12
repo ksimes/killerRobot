@@ -27,13 +27,13 @@ public class RobotStartup {
      * @throws RuntimeException
      */
     private static void initLogging() throws RuntimeException {
-//        try {
-//            Properties properties = new Properties();
-//            properties.load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
-//            System.getProperties().load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
-//        } catch (Exception e) {
-//            throw new RuntimeException("Unable to load logging properties for System");
-//        }
+        try {
+            Properties properties = new Properties();
+            properties.load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
+            System.getProperties().load(RobotStartup.class.getClassLoader().getResourceAsStream("log4j.properties"));
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load logging properties for System");
+        }
     }
 
     public static void main(String[] args) {
