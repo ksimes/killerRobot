@@ -55,15 +55,7 @@ public enum OpCode {
     step,               // (n n n -- ) Steps, side, precision
     distance,           // ( n n)
 
-    Forwards,
-    Stop,
-    Backwards,
-    Left,
-    Right,
-    HardLeft,
-    HardRight,
-    Shutdown,
-    Pause,
+    Robot,
 
     buildVariable,
     quitOut,

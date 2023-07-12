@@ -4,12 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stronans.messagebus.MessageBus;
 import com.stronans.motozero.messages.MotorMessage;
-import com.stronans.motozero.messages.MotorMessages;
 import com.stronans.robot.core.OpCode;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.stronans.motozero.motors.MotorController.DRIVER;
 
@@ -24,26 +20,16 @@ import static com.stronans.motozero.motors.MotorController.DRIVER;
 class OutputOpcodes {
     private final MessageBus messageBus = MessageBus.getInstance();
     private final ObjectMapper mapper = new ObjectMapper();
-    private final Map<OpCode, MotorMessages> mapping = new HashMap<>();
 
     public OutputOpcodes() {
-        mapping.put(OpCode.Forwards, MotorMessages.Forwards);
-        mapping.put(OpCode.Stop, MotorMessages.Stop);
-        mapping.put(OpCode.Backwards, MotorMessages.Backwards);
-        mapping.put(OpCode.Left, MotorMessages.Left);
-        mapping.put(OpCode.Right, MotorMessages.Right);
-        mapping.put(OpCode.HardLeft, MotorMessages.HardLeft);
-        mapping.put(OpCode.HardRight, MotorMessages.HardRight);
-        mapping.put(OpCode.Shutdown, MotorMessages.Shutdown);
-        mapping.put(OpCode.Pause, MotorMessages.Pause);
     }
 
-    void execute(OpCode opcode, Long register) {
-        sendMessage(mapping.get(opcode), register);
+    void execute(OpCode opcode, Long registerA, Long registerB) {
+        sendMessage(opcode, registerA, registerB);
     }
 
-    private void sendMessage(MotorMessages message, Long action) {
-        MotorMessage payload = new MotorMessage(message.name(), action.intValue());
+    private void sendMessage(OpCode opcode, Long action, Long behaviour) {
+        MotorMessage payload = new MotorMessage(opcode.name(), action.intValue());
 
         try {
             String data = mapper.writeValueAsString(payload);

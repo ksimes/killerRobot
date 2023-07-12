@@ -65,17 +65,26 @@
 : @ |fetchVariable ;
 : ? @ . ;
 
-( Robot control )
-: FORWARD |popA |Forwards ;     ( Moves the Robot forward at a given speed 0 - 10 )
-: STOP |Stop ;
-: BACKWARDS |popA |Backwards ;  ( Moves the Robot backwards at a given speed 0 - 10 )
-: PAUSE |popA |Pause ;          ( Pauses the motor processing thread for a given number of Microseconds )
-: LEFT |popA |Left ;            ( Turns the Robot left for a given number of degrees )
-: RIGHT |popA |Right ;          ( Turns the Robot right for a given number of degrees )
-: HARDLEFT |popA |HardLeft ;    ( Turns the Robot left in position for a given number of degrees )
-: HARDRIGHT |popA |HardRight ;  ( Turns the Robot right in position for a given number of degrees )
+( Robot output control )
+1 CONSTANT ROBOT_FORWARD
+2 CONSTANT ROBOT_STOP
+3 CONSTANT ROBOT_BACKWARDS
+4 CONSTANT ROBOT_PAUSE
+5 CONSTANT ROBOT_LEFT
+6 CONSTANT ROBOT_RIGHT
+7 CONSTANT ROBOT_HARDLEFT
+8 CONSTANT ROBOT_HARDRIGHT
 
-( Events )
+: FORWARD ROBOT_FORWARD |popA |Robot ;      ( Moves the Robot forward at a given speed 0 - 10 )
+: STOP ROBOT_STOP |Robot ;
+: BACKWARDS ROBOT_BACKWARDS |popA |Robot ;  ( Moves the Robot backwards at a given speed 0 - 10 )
+: PAUSE ROBOT_PAUSE |popA |Robot ;          ( Pauses the motor processing thread for a given number of Microseconds )
+: LEFT ROBOT_LEFT |popA |Robot ;            ( Turns the Robot left for a given number of degrees )
+: RIGHT ROBOT_RIGHT |popA |Robot ;          ( Turns the Robot right for a given number of degrees )
+: HARDLEFT ROBOT_HARDLEFT |popA |Robot ;    ( Turns the Robot left in position for a given number of degrees )
+: HARDRIGHT ROBOT_HARDRIGHT |popA |Robot ;  ( Turns the Robot right in position for a given number of degrees )
+
+( Events input control )
 : DISTANCE |popA |distance ;    ( return distance to any obstacle by a given UltraSonic sensor  n - n )
 : PICTURE |picture ;            ( take a single picture with on board camera )
 : VIDEO ;                       ( param seconds - take a video with on board camera )

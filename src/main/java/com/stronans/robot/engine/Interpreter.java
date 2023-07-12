@@ -565,8 +565,12 @@ public class Interpreter {
             case pushAddressR:
                 break;
 
+            case Robot:
+                outputOpcodes.execute(code, registerA, registerB);
+                break;
+
             default:
-                outputOpcodes.execute(code, registerA);
+                log.trace("Unused Opcode - " + code.name());
                 break;
         }
     }
