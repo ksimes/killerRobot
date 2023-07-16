@@ -28,6 +28,8 @@ public enum OpCode {
     pushRB,             // (n -- r)
     incB,               // (n -- n)
     decB,               // (n -- n)
+    pushC,              // ( -- n)
+    popC,               // (n -- )
     jumpEqAB,
     jumpANEq0,
     addAB,
@@ -55,13 +57,13 @@ public enum OpCode {
     step,               // (n n n -- ) Steps, side, precision
     distance,           // ( n n)
 
-    Robot,
-
     buildVariable,
     quitOut,
     storeVariable,
     fetchVariable,
     buildConstant,
+
+    Carriage,   // Tracks, wheels or legs
 
     picture
     ;

@@ -35,7 +35,7 @@
 : DUP |popA |pushA |pushA ;
 : DROP |popA ;
 : SWAP |popA |popB |pushA |pushB ;
-: OVER ;
+: OVER |popA |popB |pushA |pushB |pushA ;
 : ROT ;
 
 ( Logic )
@@ -48,6 +48,15 @@
 : AND |popA |popB |andAB |pushA ;
 : OR |popA |popB |orAB |pushA ;
 : INVERT 0= If 1 else 0 then ;
+
+( Quickie operators )
+: 1+ 1 + ;
+: 1- 1 - ;
+: 2+ 2 + ;
+: 2- 2 - ;
+: 2* 2 * ;
+: 2/ 2 / ;
+
 
 ( display )
 : ." |processString ; IMMEDIATE
@@ -75,14 +84,14 @@
 7 CONSTANT ROBOT_HARDLEFT
 8 CONSTANT ROBOT_HARDRIGHT
 
-: FORWARD ROBOT_FORWARD |popA |Robot ;      ( Moves the Robot forward at a given speed 0 - 10 )
-: STOP ROBOT_STOP |Robot ;
-: BACKWARDS ROBOT_BACKWARDS |popA |Robot ;  ( Moves the Robot backwards at a given speed 0 - 10 )
-: PAUSE ROBOT_PAUSE |popA |Robot ;          ( Pauses the motor processing thread for a given number of Microseconds )
-: LEFT ROBOT_LEFT |popA |Robot ;            ( Turns the Robot left for a given number of degrees )
-: RIGHT ROBOT_RIGHT |popA |Robot ;          ( Turns the Robot right for a given number of degrees )
-: HARDLEFT ROBOT_HARDLEFT |popA |Robot ;    ( Turns the Robot left in position for a given number of degrees )
-: HARDRIGHT ROBOT_HARDRIGHT |popA |Robot ;  ( Turns the Robot right in position for a given number of degrees )
+: FORWARD ROBOT_FORWARD |popA |Carriage ;      ( Moves the Robot forward at a given speed 0 - 10 )
+: STOP ROBOT_STOP |Carriage ;
+: BACKWARDS ROBOT_BACKWARDS |popA |Carriage ;  ( Moves the Robot backwards at a given speed 0 - 10 )
+: PAUSE ROBOT_PAUSE |popA |Carriage ;          ( Pauses the motor processing thread for a given number of Microseconds )
+: LEFT ROBOT_LEFT |popA |Carriage ;            ( Turns the Robot left for a given number of degrees )
+: RIGHT ROBOT_RIGHT |popA |Carriage ;          ( Turns the Robot right for a given number of degrees )
+: HARDLEFT ROBOT_HARDLEFT |popA |Carriage ;    ( Turns the Robot left in position for a given number of degrees )
+: HARDRIGHT ROBOT_HARDRIGHT |popA |Carriage ;  ( Turns the Robot right in position for a given number of degrees )
 
 ( Events input control )
 : DISTANCE |popA |distance ;    ( return distance to any obstacle by a given UltraSonic sensor  n - n )

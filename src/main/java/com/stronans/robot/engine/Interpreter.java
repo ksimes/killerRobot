@@ -25,7 +25,7 @@ public class Interpreter {
     private final BufferedInputStream characterStream;
     private final CoreStack dataStack = new CoreStack();
     private final CoreStack returnStack = new CoreStack();
-    private long registerA, registerB;
+    private long registerA, registerB, registerC;
     private final Settings settings;
     private final Compiler compileWord = new Compiler();
     private RunningMode runMode = RunningMode.interpret;
@@ -61,7 +61,7 @@ public class Interpreter {
                         if (settings.isVerbose()) {
                             Common.outputln("Executing: [" + token.asText() + "]");
                         }
-                        runMode = execute(word, runMode);
+                        runMode = executeWord(word, runMode);
                     } else {
                         compileWord.addWord(word);
                     }
@@ -125,6 +125,7 @@ public class Interpreter {
         returnStack.clear();
         registerA = 0;
         registerB = 0;
+        registerC = 0;
     }
 
     /**
@@ -136,7 +137,7 @@ public class Interpreter {
      * @param delimiter character to stop reading at. Read position over to next character.
      * @throws IOException
      */
-    private void readToCharacter(BufferedInputStream fis, char delimiter) throws IOException {
+    private void readStreamToCharacter(BufferedInputStream fis, char delimiter) throws IOException {
         boolean finished;
         int content;
         // read the input stream until we find the delimiting character
@@ -154,13 +155,16 @@ public class Interpreter {
 
     private void tracePoint(int codePointer, String data)
     {
-        log.trace("CP " + codePointer + " : " + data);
+        if (log.isTraceEnabled()) {
+            log.trace("CodePoint " + codePointer + " : " + data);
+        }
+
         if (settings.isVerbose()) {
             Common.outputln("CodePoint " + codePointer + " : " + data);
         }
     }
 
-    private RunningMode execute(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
+    private RunningMode executeWord(Word word, RunningMode runMode) throws StackEmptyException, IOException, QuitException {
 
         for (int codePointer = 0; codePointer < word.getCode().size(); codePointer++) {
 
@@ -170,7 +174,7 @@ public class Interpreter {
                 case Word -> {
                     Word wordExecuting = command.getWord();
                     tracePoint(codePointer, "Executing Word : " + wordExecuting.getName());
-                    runMode = execute(wordExecuting, runMode);
+                    runMode = executeWord(wordExecuting, runMode);
                     lastWord = wordExecuting;
                 }
 
@@ -198,9 +202,7 @@ public class Interpreter {
                     switch (command.getOperation()) {
                         case toInterpretMode -> {
                             if (runMode == RunningMode.compile) {
-                                if (log.isTraceEnabled()) {
-                                    tracePoint(codePointer, "End of Word \n");
-                                }
+                                tracePoint(codePointer, "End of Word \n");
                                 settings.getDictionary().addWord(compileWord.getAsWordListing());
                             }
                             runMode = RunningMode.interpret;
@@ -402,7 +404,7 @@ public class Interpreter {
                             settings.getDictionary().addWord(compileWord.getAsWordListing());
                         }
 
-                        default -> executeOperation(command.getOperation());
+                        default -> coreOperation(command.getOperation());
                     }
                 }
             }
@@ -411,7 +413,7 @@ public class Interpreter {
         return runMode;
     }
 
-    private void executeOperation(OpCode code) throws StackEmptyException, IOException {
+    private void coreOperation(OpCode code) throws StackEmptyException, IOException {
         switch (code) {
             case pushA:     // Push contexts of A register to stack
                 dataStack.push(registerA);
@@ -423,6 +425,11 @@ public class Interpreter {
                 log.trace("Push to data stack registerB: " + registerB);
                 break;
 
+            case pushC:     // Push contents of C register to stack
+                dataStack.push(registerC);
+                log.trace("Push to data stack registerC: " + registerC);
+                break;
+
             case popA:      // Pop contexts of top of stack to reg A
                 registerA = dataStack.pop();
                 log.trace("Pop to registerA: " + registerA);
@@ -431,6 +438,11 @@ public class Interpreter {
             case popB:      // Pop contexts of top of stack to reg B
                 registerB = dataStack.pop();
                 log.trace("Pop to registerB: " + registerB);
+                break;
+
+            case popC:      // Pop contexts of top of stack to reg B
+                registerC = dataStack.pop();
+                log.trace("Pop to registerC: " + registerC);
                 break;
 
             case incA:
@@ -499,11 +511,11 @@ public class Interpreter {
                 break;
 
             case processComment:
-                readToCharacter(characterStream, ')');
+                readStreamToCharacter(characterStream, ')');
                 break;
 
             case processComment2:
-                readToCharacter(characterStream, '\n');
+                readStreamToCharacter(characterStream, '\n');
                 break;
 
             case processString:
@@ -541,17 +553,8 @@ public class Interpreter {
                 log.trace("Make last word immediate");
                 break;
 
-            case step:      // Take a step using legs. TBD
-                break;
-
-            case distance:
-                long distance = Sensors.getSensorData(registerA);
-                dataStack.push(distance);
-                log.trace("measure sensor [" + registerA + "] value = {" + distance + "}");
-                break;
-
             case load:
-                readToCharacter(characterStream, '"');
+                readStreamToCharacter(characterStream, '"');
                 String filename = Common.processString(characterStream, '"');
                 log.trace("Load file : " + filename);
                 ProcessFile pf = new ProcessFile(filename, settings);
@@ -565,8 +568,17 @@ public class Interpreter {
             case pushAddressR:
                 break;
 
-            case Robot:
+            case distance:      // Input data from sensor
+                long distance = Sensors.getSensorData(registerA);
+                dataStack.push(distance);
+                log.trace("measure sensor [" + registerA + "] value = {" + distance + "}");
+                break;
+
+            case Carriage:      // Tracks, wheels or legs all together
                 outputOpcodes.execute(code, registerA, registerB);
+                break;
+
+            case step:      // Take a step using legs. TBD
                 break;
 
             default:
